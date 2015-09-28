@@ -30,9 +30,19 @@ modules_enabled  = ['all_modules']
 examples_enabled = False
 tests_enabled    = False
 
+# Compiler warning suppressions
+
 # Bug 1868:  be conservative about -Wstrict-overflow for optimized builds
 # on older compilers; it can generate spurious warnings.  
 cc_version_warn_strict_overflow = ('4', '8', '2')
+
+# Bug 2181:  clang warnings about unused local typedefs and potentially
+# evaluated expressions affecting clang version 7.0.0 (Xcode 7)
+# Note:  Xcode no longer reports upstream clang version so some other
+# heuristics will be needed in the future to distinguish Apple LLVM from
+# upstream LLVM version numbers
+clang_version_warn_unused_local_typedefs = ('7', '0', '0')
+clang_version_warn_potentially_evaluated = ('7', '0', '0')
 
 # Get the information out of the NS-3 configuration file.
 config_file_exists = False
@@ -373,6 +383,12 @@ def configure(conf):
         if Options.platform in ['linux']:
             if conf.check_compilation_flag('-Wl,--soname=foo'):
                 env['WL_SONAME_SUPPORTED'] = True
+    # bug 2181
+    if conf.env['CXX_NAME'] in ['clang']:
+        if conf.env['CC_VERSION'] >= clang_version_warn_unused_local_typedefs:
+            env.append_value('CXXFLAGS', '-Wno-unused-local-typedefs')
+        if conf.env['CC_VERSION'] >= clang_version_warn_potentially_evaluated: 
+            env.append_value('CXXFLAGS', '-Wno-potentially-evaluated-expression')
 
     env['ENABLE_STATIC_NS3'] = False
     if Options.options.enable_static:
