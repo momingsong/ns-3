@@ -17,6 +17,8 @@ class Data : public Block {
 
   static std::vector<Data> WrapMetadata(std::set<int> metadata, int num);
 
+  uint32_t size() { return GetWireLength() * 5; }
+
   void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
   int nonce() { return nonce_; }
 

@@ -160,7 +160,7 @@ void App::ReceiveData(::pec::Data data) {
   receive_data_message_callback_(
     this,
     data.nonce(),
-    data.GetWireLength(),
+    data.size(),
     data.metadata()
   );
 
@@ -269,7 +269,7 @@ void App::SendData(::pec::Data data) {
 
   send_data_message_callback_(    this,
     data.nonce(),
-    data.GetWireLength(),
+    data.size(),
     data.metadata()
   );
 
