@@ -5,6 +5,9 @@
 
 namespace pec {
 
+typedef unsigned char uint8_t;
+typedef unsigned int uint32_t;
+
 typedef uint32_t TlvLength;
 
 enum TlvType {
