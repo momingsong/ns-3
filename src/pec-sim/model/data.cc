@@ -24,7 +24,7 @@ std::vector<Data> Data::WrapMetadata(std::set<int> metadata, int max) {
     std::set<int> meta;
     std::set<int>::iterator iter = metadata.begin();
     while (iter != metadata.end()) {
-      if (meta.size() >= max) {
+      if (meta.size() >= (uint32_t)max) {
         datas.push_back(Data(meta));
         meta.clear();
       } 
@@ -49,7 +49,7 @@ void Data::Encode() {
   *((uint32_t *)(wire_begin_ + kTlvTypeSize)) = wire_length_;
   *((int *)(wire_begin_ + kTlvTypeLengthSize)) = nonce_;
   std::set<int>::iterator iter = metadata_.begin();
-  for (int i = 0; i < metadata_.size(); ++i) {
+  for (size_t i = 0; i < metadata_.size(); ++i) {
     *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * (i + 1))) = *iter;
     ++iter;
   }

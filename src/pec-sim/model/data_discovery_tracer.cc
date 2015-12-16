@@ -11,7 +11,7 @@ DataDiscoveryTracer::DataDiscoveryTracer(
   comment_ = comment;
   start_time_ = start_time;
 
-  output_.open(file);
+  output_.open(file.c_str());
   output_ << comment_;
 }
 

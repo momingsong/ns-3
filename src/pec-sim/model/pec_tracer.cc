@@ -17,20 +17,20 @@ PecTracer::PecTracer(std::string prefix, std::string comment) {
   interest_size_ = 0;
   data_size_ = 0;
 
-  list_.open(prefix_+"_list.data");
+  list_.open(std::string(prefix_+"_list.data").c_str());
 }
 
 PecTracer::~PecTracer() {
   if (list_.is_open()) {
     list_.close();
   }
-  for (int i = 0; i < tracers_.size(); ++i)
+  for (size_t i = 0; i < tracers_.size(); ++i)
     delete tracers_[i];
 }
 
 void PecTracer::TraceApps(ApplicationContainer apps) {
   num_ = apps.GetN();
-  for (int i = 0; i < apps.GetN(); ++i) {
+  for (size_t i = 0; i < apps.GetN(); ++i) {
     Ptr<App> app = DynamicCast<App>(apps.Get(i));
     app->TraceConnectWithoutContext(
       "StartDataDiscovery", 
@@ -53,7 +53,7 @@ void PecTracer::TraceApps(ApplicationContainer apps) {
 void PecTracer::Output() {
   // output overhead
   std::ofstream output;
-  output.open(prefix_ + "_overhead.data");
+  output.open(std::string(prefix_ + "_overhead.data").c_str());
   output << comment_ 
     << ((double)message_num_) / num_ << " "
     << ((double)message_size_) / message_num_ << " "
@@ -67,7 +67,9 @@ void PecTracer::Output() {
 void PecTracer::StartDataDiscovery(Ptr<App> app) {
   double start_time = Simulator::Now().GetSeconds();
   int index = tracers_.size();
-  DataDiscoveryTracer *tracer = new DataDiscoveryTracer(prefix_ + "_" + std::to_string(index) + ".data", comment_, start_time);
+  char indexChar[10];
+  sprintf(indexChar, "%d", index);
+  DataDiscoveryTracer *tracer = new DataDiscoveryTracer(prefix_ + "_" + indexChar + ".data", comment_, start_time);
   tracer->TraceApp(app);
   tracers_.push_back(tracer);
   list_ << index << " " << app->GetNode()->GetId() << " " << start_time << std::endl;

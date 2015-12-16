@@ -1,5 +1,4 @@
 #include "block.h"
-
 #include <algorithm>
 
 namespace pec {

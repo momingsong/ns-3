@@ -1,5 +1,13 @@
 .lock-waf_darwin_build
+.lock-waf_cygwin_build
+*.exe
+*.stackdump
 .waf*
 build/
 *.pyc
 *.patch
+*.sh
+*.gp
+*.data
+*.png
+process.cc

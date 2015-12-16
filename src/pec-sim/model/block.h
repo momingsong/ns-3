@@ -1,7 +1,12 @@
 #ifndef PEC_BLOCK_H_
 #define PEC_BLOCK_H_
 
+#define _CPP11NSUP
 #include <cstdlib>
+#ifdef _CPP11NSUP
+typedef unsigned char uint8_t;
+typedef unsigned int uint32_t;
+#endif
 
 namespace pec {
 

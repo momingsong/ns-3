@@ -144,7 +144,7 @@ void App::ReceiveInterest(::pec::Interest interest) {
   }
 
   // send data messages
-  for (int i = 0; i < datas.size(); ++i) {
+  for (size_t i = 0; i < datas.size(); ++i) {
     SendData(datas[i]);
   }
 }
