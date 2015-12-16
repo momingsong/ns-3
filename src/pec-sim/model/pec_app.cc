@@ -144,8 +144,10 @@ void App::ReceiveInterest(::pec::Interest interest) {
   }
 
   // send data messages
+  std::set<int> recs;
+  recs.insert(interest.sender());
   for (int i = 0; i < datas.size(); ++i) {
-    SendData(datas[i]);
+    SendData(datas[i], recs);
   }
 }
 
@@ -179,19 +181,27 @@ void App::ReceiveData(::pec::Data data) {
   ++data_message_count_round_;
   ++data_message_count_slot_;
 
+  if (data.receivers().find(this->GetNode()->GetId()) == data.receivers().end()) {
+    return;
+  }
+
   // redundancy detection
+  std::set<int> recs;
   if (enable_redundancy_detection_) {
     std::set<int> irredundant_metadata;
-    irredundant_metadata = pit_.GetIrredundantMetadata(data.metadata());
+    irredundant_metadata = pit_.GetIrredundantMetadata(data.metadata(), recs);
     // modify data message
     data.set_metadata(irredundant_metadata);
     // modify cached interest messages
     pit_.AddMetadataToAll(irredundant_metadata);
+  } else {
+    recs = pit_.GetAllReceivers();
   }
 
   // send data message
-  if (data.metadata().size() > 0)
-    SendData(data);
+  if (data.metadata().size() > 0) {
+    SendData(data, recs);
+  }
 }
 
 void App::DataDiscovery() {
@@ -249,6 +259,8 @@ void App::NextSlot() {
 
 void App::SendInterest(::pec::Interest interest) {
 
+  interest.set_sender(this->GetNode()->GetId());
+
   send_interest_message_callback_(
     this,
     interest.nonce(), 
@@ -264,8 +276,10 @@ void App::SendInterest(::pec::Interest interest) {
   }
 }
 
-void App::SendData(::pec::Data data) {
+void App::SendData(::pec::Data data, std::set<int> receivers) {
   // NS_LOG_FUNCTION(this << data.nonce() << data.metadata().size());
+
+  data.set_receivers(receivers);
 
   send_data_message_callback_(    this,
     data.nonce(),

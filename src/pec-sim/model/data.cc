@@ -41,23 +41,38 @@ std::vector<Data> Data::WrapMetadata(std::set<int> metadata, int max) {
 void Data::Encode() {
   Reset();
 
-  wire_length_ = kTlvTypeLengthSize + sizeof(int) * (1 + metadata_.size());
+  wire_length_ = kTlvTypeLengthSize + sizeof(int) * (2 + receivers_.size() + metadata_.size());
   wire_begin_ = new uint8_t[wire_length_];
 
   TlvType type = kTlvData;
   *((TlvType *)wire_begin_) = type;
   *((uint32_t *)(wire_begin_ + kTlvTypeSize)) = wire_length_;
   *((int *)(wire_begin_ + kTlvTypeLengthSize)) = nonce_;
-  std::set<int>::iterator iter = metadata_.begin();
+  *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int))) = receivers_.size();
+
+  uint8_t *p = wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2;
+  std::set<int>::iterator iter = receivers_.begin();
+  for (int i = 0; i < receivers_.size(); ++i) {
+    *((int *)(p + sizeof(int) * i)) = *iter;
+    ++iter;
+  }
+  p = wire_begin_ + kTlvTypeLengthSize + sizeof(int) * (2 + receivers_.size());
+  iter = metadata_.begin();
   for (int i = 0; i < metadata_.size(); ++i) {
-    *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * (i + 1))) = *iter;
+    *((int *)(p + sizeof(int) * i)) = *iter;
     ++iter;
   }
 }
 
 void Data::Decode() {
   nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize));
-  int *p = (int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int));
+  int num_receiver = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int)));
+  int *p = (int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2);
+  receivers_.clear();
+  for (int i = 0; i < num_receiver; ++i) {
+    receivers_.insert(*p);
+    ++p;
+  }
   metadata_.clear();
   while ((uint8_t *)p != wire_begin_ + wire_length_) {
     metadata_.insert(*p);

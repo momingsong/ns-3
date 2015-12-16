@@ -74,8 +74,8 @@ void PecTracer::StartDataDiscovery(Ptr<App> app) {
 }
 
 void PecTracer::SendInterest(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-  NS_LOG_UNCOND("SI: " << app->GetNode()->GetId() << " " 
-                       << nonce << " " << size << " " << metadata.size());
+  // NS_LOG_UNCOND("SI: " << app->GetNode()->GetId() << " " 
+  //                      << nonce << " " << size << " " << metadata.size());
   message_size_ += size;
   interest_size_ += size;
   ++message_num_;
@@ -83,8 +83,8 @@ void PecTracer::SendInterest(Ptr<App> app, int nonce, uint32_t size, const std::
 }
 
 void PecTracer::SendData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-  NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " " 
-                       << nonce << " " << size << " " << metadata.size());
+  // NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " " 
+  //                      << nonce << " " << size << " " << metadata.size());
   message_size_ += size;
   data_size_ += size;
   ++message_num_;
@@ -92,13 +92,13 @@ void PecTracer::SendData(Ptr<App> app, int nonce, uint32_t size, const std::set<
 }
 
 void PecTracer::ReceiveInterest(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-  NS_LOG_UNCOND("RI: " << app->GetNode()->GetId() << " " 
-                       << nonce << " " << size << " " << metadata.size());
+  // NS_LOG_UNCOND("RI: " << app->GetNode()->GetId() << " " 
+  //                      << nonce << " " << size << " " << metadata.size());
 }
 
 void PecTracer::ReceiveData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-  NS_LOG_UNCOND("RD: " << app->GetNode()->GetId() << " " 
-                       << nonce << " " << size << " " << metadata.size());
+  // NS_LOG_UNCOND("RD: " << app->GetNode()->GetId() << " " 
+  //                      << nonce << " " << size << " " << metadata.size());
 }
 
 } // namespace pec
