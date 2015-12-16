@@ -47,7 +47,7 @@ class App : public Application, public ::pec::MessageReceiverInterface {
   void NextSlot();
 
   void SendInterest(::pec::Interest interest);
-  void SendData(::pec::Data data);
+  void SendData(::pec::Data data, std::set<int> receivers);
 
   ::pec::PendingInterestTable pit_;
   std::set<int> local_metadata_;

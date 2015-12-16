@@ -22,14 +22,18 @@ class Data : public Block {
   void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
   int nonce() { return nonce_; }
 
-  void set_metadata(std::set<int> metadata) { metadata_ = metadata; }
+  void set_metadata(std::set<int> metadata) { Reset(); metadata_ = metadata; }
   const std::set<int> &metadata() { return metadata_; }
+
+  void set_receivers(std::set<int> receivers) { Reset(); receivers_ = receivers; }
+  const std::set<int> &receivers() { return receivers_; }
 
  private:
   void Encode();
   void Decode();
 
   int nonce_;
+  std::set<int> receivers_;
   std::set<int> metadata_;
 };
 

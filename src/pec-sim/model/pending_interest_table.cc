@@ -14,16 +14,21 @@ void PendingInterestTable::UpdateInterest(Interest interest) {
   table_.find(interest.nonce())->second = interest;
 }
 
-std::set<int> PendingInterestTable::GetIrredundantMetadata(std::set<int> metadata) {
+std::set<int> PendingInterestTable::GetIrredundantMetadata(
+  std::set<int> metadata, std::set<int> &receivers) {
   std::set<int> irredundant_metadata;
   for (std::set<int>::iterator m_iter = metadata.begin(); 
        m_iter != metadata.end(); ++m_iter) {
+    bool irred = false;
     for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
          i_iter != table_.end(); ++i_iter) {
       if (!i_iter->second.HasMetadata(*m_iter)) {
-        irredundant_metadata.insert(*m_iter);
-        break;
+        receivers.insert(i_iter->second.sender());
+        irred = true;
       }
+    }
+    if (irred) {
+      irredundant_metadata.insert(*m_iter);
     }
   }
   return irredundant_metadata;
@@ -39,6 +44,15 @@ void PendingInterestTable::AddMetadataToAll(std::set<int> metadata) {
       }
     }
   }
+}
+
+std::set<int> PendingInterestTable::GetAllReceivers() {
+  std::set<int> s;
+  for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
+       i_iter != table_.end(); ++i_iter) {
+    s.insert(i_iter->second.sender());
+  }
+  return s;
 }
 
 } // namespace pec
