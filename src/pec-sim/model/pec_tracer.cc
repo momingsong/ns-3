@@ -76,13 +76,27 @@ void PecTracer::StartDataDiscovery(Ptr<App> app) {
 }
 
 void PecTracer::SendInterest(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-<<<<<<< HEAD
 std::ofstream output;
   output.open(std::string(prefix_ + "_SI.data").c_str(),std::fstream::out | std::fstream::app);
   NS_LOG_UNCOND("SI: " << app->GetNode()->GetId() << " " 
                        << nonce << " " << size << " " << metadata.size());
-  output<<"SI: " << app->GetNode()->GetId() " " <<Simulator::Now().GetSeconds()<< " Package:" 
-                       << nonce<<" "<< metadata.size() <<"\nContent: ";
+  output<<"SI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
+                       << nonce<<" "<<size<<" "<< metadata.size() <<std::endl;
+
+  message_size_ += size;
+  interest_size_ += size;
+  ++message_num_;
+  ++interest_num_;
+}
+
+void PecTracer::SendData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
+  NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " " 
+                       << nonce << " " << size << " " << metadata.size()<<" ");
+std::ofstream output;
+  output.open(std::string(prefix_ + "_SD.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"SD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
+                       << nonce<<" "<<size<<" "<< metadata.size() <<"\nContent: ";
+
   for(std::set<int>::iterator sit=metadata.begin();sit!=metadata.end();sit++)
 	{
 output<<*sit<<" ";
@@ -95,28 +109,39 @@ output<<*lit<<" ";
 	}
 output<<std::endl;
   message_size_ += size;
-  interest_size_ += size;
-  ++message_num_;
-  ++interest_num_;
-}
-
-void PecTracer::SendData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
-  NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " " 
-                       << nonce << " " << size << " " << metadata.size()<<" ");
-  message_size_ += size;
   data_size_ += size;
   ++message_num_;
   ++data_num_;
 }
 
 void PecTracer::ReceiveInterest(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
+std::ofstream output;
+  output.open(std::string(prefix_ + "_RI.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"RI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
+                       << nonce<<" "<<size<<" "<< metadata.size()<<std::endl;
   // NS_LOG_UNCOND("RI: " << app->GetNode()->GetId() << " " 
   //                      << nonce << " " << size << " " << metadata.size());
+
 }
 
 void PecTracer::ReceiveData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
   // NS_LOG_UNCOND("RD: " << app->GetNode()->GetId() << " " 
   //                      << nonce << " " << size << " " << metadata.size());
+std::ofstream output;
+  output.open(std::string(prefix_ + "_RD.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"RD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
+                       << nonce<<" "<<size<<" "<< metadata.size() <<"\nContent: ";
+  for(std::set<int>::iterator sit=metadata.begin();sit!=metadata.end();sit++)
+	{
+output<<*sit<<" ";
+	}
+output<<std::endl;
+output<<"Local Package: ";
+ for(std::set<int>::iterator lit=app->local_metadata().begin();lit!=app->local_metadata().end();lit++)
+	{
+output<<*lit<<" ";
+	}
+output<<std::endl;
 }
 
 } // namespace pec
