@@ -79,9 +79,13 @@ TypeId App::GetTypeId() {
                       "Receive ineterest message from the network",
                       MakeTraceSourceAccessor(&App::receive_interest_message_callback_),
                       "ns3::pec::App::ReceiveInterest")
-      .AddTraceSource("ReceiveData",
-                      "Receive datas message from the network",
-                      MakeTraceSourceAccessor(&App::receive_data_message_callback_),
+      .AddTraceSource("WillReceiveData",
+                      "Will receive datas message from the network",
+                      MakeTraceSourceAccessor(&App::will_receive_data_message_callback_),
+                      "ns3::pec::App::ReceiveData")
+      .AddTraceSource("DidReceiveData",
+                      "Did receive datas message from the network",
+                      MakeTraceSourceAccessor(&App::did_receive_data_message_callback_),
                       "ns3::pec::App::ReceiveData");
   return tid;
 }
@@ -103,12 +107,14 @@ void App::ReceiveInterest(::pec::Interest interest) {
   pit_.AddInterest(interest);
 
   // tracing
+  /*
   receive_interest_message_callback_(
     this,
     interest.nonce(), 
     enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
                                  : ::pec::Interest::kSizeWithoutBloomFilter,
     interest.metadata());
+    */
 
   // redundancy detection
   std::set<int> irredundant_metadata;
@@ -145,7 +151,7 @@ void App::ReceiveInterest(::pec::Interest interest) {
 
   // send data messages
   std::set<int> recs;
-  recs.insert(interest.sender());
+  // recs.insert(interest.sender());
   for (size_t i = 0; i < datas.size(); ++i) {
     SendData(datas[i], recs);
   }
@@ -159,12 +165,12 @@ void App::ReceiveData(::pec::Data data) {
   data_nonces_.insert(data.nonce());
 
   // tracing
-  receive_data_message_callback_(
+  /*receive_data_message_callback_(
     this,
     data.nonce(),
     data.size(),
     data.metadata()
-  );
+  );*/
 
   // update local metadata and multi-round state information
   int prev_size = local_metadata_.size();
@@ -181,9 +187,10 @@ void App::ReceiveData(::pec::Data data) {
   ++data_message_count_round_;
   ++data_message_count_slot_;
 
+  /*
   if (data.receivers().find(this->GetNode()->GetId()) == data.receivers().end()) {
     return;
-  }
+  }*/
 
   // redundancy detection
   std::set<int> recs;
@@ -258,16 +265,16 @@ void App::NextSlot() {
 }
 
 void App::SendInterest(::pec::Interest interest) {
+  interest.set_hop_nonce(rand());
+  // interest.set_sender(this->GetNode()->GetId());
 
-  interest.set_sender(this->GetNode()->GetId());
-
-  send_interest_message_callback_(
+  /*send_interest_message_callback_(
     this,
     interest.nonce(), 
     enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
                                  : ::pec::Interest::kSizeWithoutBloomFilter,
     interest.metadata()
-  );
+  );*/
 
   if (enable_collision_avoidance_) {
     network_adapter_.SendInterest(interest, max_backoff_);
@@ -279,13 +286,15 @@ void App::SendInterest(::pec::Interest interest) {
 void App::SendData(::pec::Data data, std::set<int> receivers) {
   // NS_LOG_FUNCTION(this << data.nonce() << data.metadata().size());
 
-  data.set_receivers(receivers);
+  data.set_hop_nonce(rand());
 
-  send_data_message_callback_(    this,
+  // data.set_receivers(receivers);
+
+  /*send_data_message_callback_(    this,
     data.nonce(),
     data.size(),
     data.metadata()
-  );
+  );*/
 
   if (enable_collision_avoidance_) {
     network_adapter_.SendData(data, max_backoff_);

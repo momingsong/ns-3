@@ -25,15 +25,15 @@ class Data : public Block {
   void set_metadata(std::set<int> metadata) { Reset(); metadata_ = metadata; }
   const std::set<int> &metadata() { return metadata_; }
 
-  void set_receivers(std::set<int> receivers) { Reset(); receivers_ = receivers; }
-  const std::set<int> &receivers() { return receivers_; }
+  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
+  int hop_nonce() { return hop_nonce_; }
 
  private:
   void Encode();
   void Decode();
 
   int nonce_;
-  std::set<int> receivers_;
+  int hop_nonce_;
   std::set<int> metadata_;
 };
 

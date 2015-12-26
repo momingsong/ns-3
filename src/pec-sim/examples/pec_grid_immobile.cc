@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
 
   Ipv4AddressHelper ipv4;
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer i = ipv4.Assign (devices);
+  Ipv4InterfaceContainer ip_container = ipv4.Assign (devices);
 
   //
   // Mobility
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
   helper.set_redundancy(redundancy);
  
   ApplicationContainer apps = helper.Install(nodes);
-  ns3::pec::PecTracer tracer(trace_path, parameters);
+  ns3::pec::PecTracer tracer(trace_path, parameters, ip_container);
   tracer.TraceApps(apps);
 
   //

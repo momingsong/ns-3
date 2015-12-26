@@ -23,7 +23,7 @@ std::set<int> PendingInterestTable::GetIrredundantMetadata(
     for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
          i_iter != table_.end(); ++i_iter) {
       if (!i_iter->second.HasMetadata(*m_iter)) {
-        receivers.insert(i_iter->second.sender());
+        // receivers.insert(i_iter->second.sender());
         irred = true;
       }
     }
@@ -50,7 +50,7 @@ std::set<int> PendingInterestTable::GetAllReceivers() {
   std::set<int> s;
   for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
        i_iter != table_.end(); ++i_iter) {
-    s.insert(i_iter->second.sender());
+    //s.insert(i_iter->second.sender());
   }
   return s;
 }

@@ -43,7 +43,7 @@ void Interest::Encode() {
   *((TlvType *)wire_begin_) = type;
   *((uint32_t *)(wire_begin_ + kTlvTypeSize)) = wire_length_;
   *((int *)(wire_begin_ + kTlvTypeLengthSize)) = nonce_;
-  *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int))) = sender_;
+  *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int))) = hop_nonce_;
   std::set<int>::iterator iter = metadata_.begin();
   int i = 0;
   while (iter != metadata_.end()) {
@@ -54,7 +54,7 @@ void Interest::Encode() {
 
 void Interest::Decode() {
   nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize));
-  sender_ = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int)));
+  hop_nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int)));
   int *p = (int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2);
   metadata_.clear();
   while ((uint8_t *)p != wire_begin_ + wire_length_) {

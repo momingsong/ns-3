@@ -82,7 +82,11 @@ void NetworkAdapter::Send(::pec::Block &message, double max_backoff) {
 
 void NetworkAdapter::Receive(Ptr<Socket> socket) {
   Ptr<Packet> packet;
-  while ((packet = socket->Recv())) {
+  Address sender;
+  while ((packet = socket->RecvFrom(sender))) {
+    // std::stringstream ss;
+    // InetSocketAddress::ConvertFrom(sender).GetIpv4().Print(ss);
+    // NS_LOG_UNCOND(ss.str());
     // NS_LOG_UNCOND("ReceiveMessage");
     uint32_t len = packet->GetSize();
     uint8_t *buf = new uint8_t[len];

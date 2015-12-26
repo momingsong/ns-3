@@ -85,12 +85,54 @@ class App : public Application, public ::pec::MessageReceiverInterface {
 
   TracedCallback<Ptr<App> > start_data_discovery_callback_;
 
-  // parameteres for the following 4 callbacks:
-  // AppPointer, MessageNonce, MessageSize, MetadataSetReference
-  TracedCallback<Ptr<App>, int, uint32_t, const std::set<int> &> send_interest_message_callback_;
-  TracedCallback<Ptr<App>, int, uint32_t, const std::set<int> &> send_data_message_callback_;
-  TracedCallback<Ptr<App>, int, uint32_t, const std::set<int> &> receive_interest_message_callback_;
-  TracedCallback<Ptr<App>, int, uint32_t, const std::set<int> &> receive_data_message_callback_;
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    Ipv4Address,  // FromIpAddress
+    int,          // Nonce
+    int,          // Hop Nonce
+    uint32_t,     // MessageSize
+    const std::set<int> & // MetadataSetReference
+  > send_interest_message_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    Ipv4Address,  // FromIpAddress
+    Ipv4Address,  // ToIpAddress
+    int,          // Nonce
+    int,          // HopNonce
+    uint32_t,     // MessageSize
+    const std::set<int> & // MetadataSetReference
+  > send_data_message_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    Ipv4Address,  // FromIpAddress
+    int,          // Nonce
+    int,          // Hop Nonce
+    uint32_t,     // MessageSize
+    const std::set<int> & // MetadataSetReference
+  > receive_interest_message_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    Ipv4Address,  // FromIpAddress
+    Ipv4Address,  // ToIpAddress
+    int,          // Nonce
+    int,          // HopNonce
+    uint32_t,     // MessageSize
+    const std::set<int> & // MetadataSetReference
+  > will_receive_data_message_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    Ipv4Address,  // FromIpAddress
+    Ipv4Address,  // ToIpAddress
+    int,          // Nonce
+    int,          // HopNonce
+    uint32_t,     // MessageSize
+    const std::set<int> & // MetadataSetReference
+  > did_receive_data_message_callback_;
+
 };
 
 } // namespace pec

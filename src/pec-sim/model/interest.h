@@ -26,8 +26,8 @@ class Interest : public Block {
   void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
   int nonce() { return nonce_; }
 
-  void set_sender(int sender) { Reset(); sender_ = sender; }
-  int sender() { return sender_; }
+  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
+  int hop_nonce() { return hop_nonce_; }
 
   const std::set<int> &metadata() { return metadata_; }
 
@@ -36,7 +36,7 @@ class Interest : public Block {
   void Decode();
 
   int nonce_;
-  int sender_;
+  int hop_nonce_;
   std::set<int> metadata_;
 };
 
