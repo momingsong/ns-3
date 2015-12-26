@@ -27,11 +27,11 @@ class PecTracer {
   Ptr<Node> GetNodeFromIp(Ipv4Address address);
   // Callbacks
   void StartDataDiscovery(Ptr<App> app);
-  void SendInterest(Ptr<App> app, Ipv4Address fromIp, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
-  void SendData(Ptr<App> app, Ipv4Address fromIp, Ipv4Address toIp, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
-  void ReceiveInterest(Ptr<App> app, Ipv4Address fromIp, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
-  void WillReceiveData(Ptr<App> app, Ipv4Address fromIp, Ipv4Address toIp, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
-  void DidReceiveData(Ptr<App> app, Ipv4Address fromIp, Ipv4Address toIp, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void SendInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void SendData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void WillReceiveData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void DidReceiveData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
 
   std::string prefix_;
   std::string comment_;
