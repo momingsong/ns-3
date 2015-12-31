@@ -22,18 +22,21 @@ class Data : public Block {
   void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
   int nonce() { return nonce_; }
 
+  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
+  int hop_nonce() { return hop_nonce_; }
+
   void set_metadata(std::set<int> metadata) { Reset(); metadata_ = metadata; }
   const std::set<int> &metadata() { return metadata_; }
 
-  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
-  int hop_nonce() { return hop_nonce_; }
+  void set_receivers(std::set<uint32_t> receivers) { Reset(); receivers_ = receivers; }
+  const std::set<uint32_t> &receivers() { return receivers_; }
 
  private:
   void Encode();
   void Decode();
-
   int nonce_;
   int hop_nonce_;
+  std::set<uint32_t> receivers_;
   std::set<int> metadata_;
 };
 

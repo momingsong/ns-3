@@ -15,7 +15,7 @@ void PendingInterestTable::UpdateInterest(Interest interest) {
 }
 
 std::set<int> PendingInterestTable::GetIrredundantMetadata(
-  std::set<int> metadata, std::set<int> &receivers) {
+  std::set<int> metadata, std::set<uint32_t> &receivers) {
   std::set<int> irredundant_metadata;
   for (std::set<int>::iterator m_iter = metadata.begin(); 
        m_iter != metadata.end(); ++m_iter) {
@@ -23,7 +23,7 @@ std::set<int> PendingInterestTable::GetIrredundantMetadata(
     for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
          i_iter != table_.end(); ++i_iter) {
       if (!i_iter->second.HasMetadata(*m_iter)) {
-        // receivers.insert(i_iter->second.sender());
+        receivers.insert(i_iter->second.sender());
         irred = true;
       }
     }
@@ -46,11 +46,11 @@ void PendingInterestTable::AddMetadataToAll(std::set<int> metadata) {
   }
 }
 
-std::set<int> PendingInterestTable::GetAllReceivers() {
-  std::set<int> s;
+std::set<uint32_t> PendingInterestTable::GetAllReceivers() {
+  std::set<uint32_t> s;
   for (std::map<int, Interest>::iterator i_iter = table_.begin(); 
        i_iter != table_.end(); ++i_iter) {
-    //s.insert(i_iter->second.sender());
+    s.insert(i_iter->second.sender());
   }
   return s;
 }

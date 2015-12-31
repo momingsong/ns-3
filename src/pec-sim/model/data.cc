@@ -41,7 +41,7 @@ std::vector<Data> Data::WrapMetadata(std::set<int> metadata, int max) {
 void Data::Encode() {
   Reset();
 
-  wire_length_ = kTlvTypeLengthSize + sizeof(int) * (2 + metadata_.size());
+  wire_length_ = kTlvTypeLengthSize + sizeof(int) * (3 + receivers_.size() + metadata_.size());
   wire_begin_ = new uint8_t[wire_length_];
 
   TlvType type = kTlvData;
@@ -49,23 +49,38 @@ void Data::Encode() {
   *((uint32_t *)(wire_begin_ + kTlvTypeSize)) = wire_length_;
   *((int *)(wire_begin_ + kTlvTypeLengthSize)) = nonce_;
   *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int))) = hop_nonce_;
+  *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2)) = receivers_.size();
 
-  uint8_t *p = wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2;
-  std::set<int>::iterator iter = metadata_.begin();
-  for (size_t i = 0; i < metadata_.size(); ++i) {
-    *((int *)(p + sizeof(int) * i)) = *iter;
-    ++iter;
+  uint8_t *p = wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 3;
+  std::set<uint32_t>::iterator r_iter = receivers_.begin();
+  while (r_iter != receivers_.end()) {
+    *((uint32_t *)p) = *r_iter;
+    p += sizeof(uint32_t);
+    ++r_iter;
+  }
+  std::set<int>::iterator m_iter = metadata_.begin();
+  while (m_iter != metadata_.end()) {
+    *((int *)p) = *m_iter;
+    p += sizeof(int);
+    ++m_iter;
   }
 }
 
 void Data::Decode() {
   nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize));
   hop_nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int)));
-  int *p = (int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2);
+  int num_receiver = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2));
+
+  uint8_t *p = wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 3;
+  receivers_.clear();
+  while (num_receiver-- > 0) {
+    receivers_.insert(*((uint32_t *)p));
+    p += sizeof(uint32_t);
+  }
   metadata_.clear();
-  while ((uint8_t *)p != wire_begin_ + wire_length_) {
-    metadata_.insert(*p);
-    ++p;
+  while (p != wire_begin_ + wire_length_) {
+    metadata_.insert(*((int *)p));
+    p += sizeof(int);
   }
 }
 

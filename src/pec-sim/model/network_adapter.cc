@@ -19,7 +19,7 @@ const InetSocketAddress kPecUdpAddress = InetSocketAddress(
                                              kPecUdpPort);
 
 NetworkAdapter::NetworkAdapter(Application &context,
-                               ::pec::MessageReceiverInterface &receiver)
+                               MessageReceiverInterface &receiver)
   : context_(context), receiver_(receiver) { }
 
 NetworkAdapter::~NetworkAdapter() {
@@ -84,23 +84,19 @@ void NetworkAdapter::Receive(Ptr<Socket> socket) {
   Ptr<Packet> packet;
   Address sender;
   while ((packet = socket->RecvFrom(sender))) {
-    // std::stringstream ss;
-    // InetSocketAddress::ConvertFrom(sender).GetIpv4().Print(ss);
-    // NS_LOG_UNCOND(ss.str());
-    // NS_LOG_UNCOND("ReceiveMessage");
     uint32_t len = packet->GetSize();
     uint8_t *buf = new uint8_t[len];
     packet->CopyData(buf, len);
+    Ipv4Address from_ip = InetSocketAddress::ConvertFrom(sender).GetIpv4();
     ::pec::TlvType type = ::pec::PeekType(buf, len);
-    // NS_LOG_UNCOND("MessageType:" << type);
     if (type == ::pec::kTlvInterest) {
       ::pec::Interest interest;
       interest.DecodeFromBuffer(buf, len);
-      receiver_.ReceiveInterest(interest);
+      receiver_.ReceiveInterest(interest, from_ip);
     } else if (type == ::pec::kTlvData) {
       ::pec::Data data;
       data.DecodeFromBuffer(buf, len);
-      receiver_.ReceiveData(data);
+      receiver_.ReceiveData(data, from_ip);
     }
     delete [] buf;
   }

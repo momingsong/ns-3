@@ -7,6 +7,7 @@
 
 #include "ns3/application.h"
 #include "ns3/traced-callback.h"
+#include "ns3/ipv4.h"
 
 #include "interest.h"
 #include "data.h"
@@ -17,15 +18,15 @@
 namespace ns3 {
 namespace pec {
 
-class App : public Application, public ::pec::MessageReceiverInterface {
+class App : public Application, public MessageReceiverInterface {
  public:
   static TypeId GetTypeId();
 
   App();
   ~App();
 
-  virtual void ReceiveInterest(::pec::Interest interest);
-  virtual void ReceiveData(::pec::Data data);
+  virtual void ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip);
+  virtual void ReceiveData(::pec::Data data, Ipv4Address from_ip);
 
   void AddMetadata(int metadata) { local_metadata_.insert(metadata); }
   bool HasMetadata(int metadata);
@@ -47,7 +48,11 @@ class App : public Application, public ::pec::MessageReceiverInterface {
   void NextSlot();
 
   void SendInterest(::pec::Interest interest);
-  void SendData(::pec::Data data, std::set<int> receivers);
+  void SendData(::pec::Data data, std::set<uint32_t> receivers);
+
+  Ipv4Address GetIp() {
+    return GetNode()->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
+  }
 
   ::pec::PendingInterestTable pit_;
   std::set<int> local_metadata_;
@@ -97,7 +102,7 @@ class App : public Application, public ::pec::MessageReceiverInterface {
   TracedCallback<
     Ptr<App>,     // AppPointer
     Ipv4Address,  // FromIpAddress
-    Ipv4Address,  // ToIpAddress
+    std::set<Ipv4Address>,  // ToIpAddresses
     int,          // Nonce
     int,          // HopNonce
     uint32_t,     // MessageSize
@@ -116,7 +121,7 @@ class App : public Application, public ::pec::MessageReceiverInterface {
   TracedCallback<
     Ptr<App>,     // AppPointer
     Ipv4Address,  // FromIpAddress
-    Ipv4Address,  // ToIpAddress
+    std::set<Ipv4Address>,  // ToIpAddresses
     int,          // Nonce
     int,          // HopNonce
     uint32_t,     // MessageSize
@@ -126,7 +131,7 @@ class App : public Application, public ::pec::MessageReceiverInterface {
   TracedCallback<
     Ptr<App>,     // AppPointer
     Ipv4Address,  // FromIpAddress
-    Ipv4Address,  // ToIpAddress
+    std::set<Ipv4Address>,  // ToIpAddresses
     int,          // Nonce
     int,          // HopNonce
     uint32_t,     // MessageSize

@@ -99,22 +99,23 @@ App::App() : network_adapter_(*this, *this) {
 
 App::~App() { }
 
-void App::ReceiveInterest(::pec::Interest interest) {
+void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
+
+  // tracing
+  receive_interest_message_callback_(
+    this,
+    from_ip,
+    interest.nonce(),
+    interest.hop_nonce(),
+    enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
+                                 : ::pec::Interest::kSizeWithoutBloomFilter,
+    interest.metadata()
+  );
 
   // loop detection
   if (pit_.Exist(interest.nonce()))
     return;
   pit_.AddInterest(interest);
-
-  // tracing
-  /*
-  receive_interest_message_callback_(
-    this,
-    interest.nonce(), 
-    enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
-                                 : ::pec::Interest::kSizeWithoutBloomFilter,
-    interest.metadata());
-    */
 
   // redundancy detection
   std::set<int> irredundant_metadata;
@@ -150,65 +151,82 @@ void App::ReceiveInterest(::pec::Interest interest) {
   }
 
   // send data messages
-  std::set<int> recs;
-  // recs.insert(interest.sender());
+  std::set<uint32_t> recs;
+  recs.insert(from_ip.Get());
   for (size_t i = 0; i < datas.size(); ++i) {
     SendData(datas[i], recs);
   }
 }
 
-void App::ReceiveData(::pec::Data data) {
-
-  // loop detection
-  if (data_nonces_.find(data.nonce()) != data_nonces_.end())
-    return;
-  data_nonces_.insert(data.nonce());
+void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
 
   // tracing
-  /*receive_data_message_callback_(
-    this,
-    data.nonce(),
-    data.size(),
-    data.metadata()
-  );*/
-
-  // update local metadata and multi-round state information
-  int prev_size = local_metadata_.size();
-  std::set<int>::iterator iter = data.metadata().begin();
-  while (iter != data.metadata().end()) {
-    if (!HasMetadata(*iter)) {
-      AddMetadata(*iter);
-    }
+  std::set<Ipv4Address> to_ips;
+  std::set<uint32_t>::iterator iter = data.receivers().begin();
+  while (iter != data.receivers().end()) {
+    to_ips.insert(Ipv4Address(*iter));
     ++iter;
   }
+  will_receive_data_message_callback_(
+    this,
+    from_ip,
+    to_ips,
+    data.nonce(),
+    data.hop_nonce(),
+    data.size(),
+    data.metadata()
+  );
 
-  metadata_count_discovery_ += local_metadata_.size() - prev_size;
-  metadata_count_round_ += local_metadata_.size() - prev_size;
-  ++data_message_count_round_;
-  ++data_message_count_slot_;
+  // loop detection
+  if (data_nonces_.find(data.nonce()) == data_nonces_.end()) {
+    data_nonces_.insert(data.nonce());
 
-  /*
-  if (data.receivers().find(this->GetNode()->GetId()) == data.receivers().end()) {
-    return;
-  }*/
+    // update local metadata and multi-round state information
+    int prev_size = local_metadata_.size();
+    std::set<int>::iterator iter = data.metadata().begin();
+    while (iter != data.metadata().end()) {
+      if (!HasMetadata(*iter)) {
+        AddMetadata(*iter);
+      }
+      ++iter;
+    }
 
-  // redundancy detection
-  std::set<int> recs;
-  if (enable_redundancy_detection_) {
-    std::set<int> irredundant_metadata;
-    irredundant_metadata = pit_.GetIrredundantMetadata(data.metadata(), recs);
-    // modify data message
-    data.set_metadata(irredundant_metadata);
-    // modify cached interest messages
-    pit_.AddMetadataToAll(irredundant_metadata);
-  } else {
-    recs = pit_.GetAllReceivers();
+    metadata_count_discovery_ += local_metadata_.size() - prev_size;
+    metadata_count_round_ += local_metadata_.size() - prev_size;
+    ++data_message_count_round_;
+    ++data_message_count_slot_;
+
+    if (data.receivers().find(GetIp().Get()) != data.receivers().end()) {
+      // redundancy detection
+      std::set<uint32_t> recs;
+      if (enable_redundancy_detection_) {
+        std::set<int> irredundant_metadata;
+        irredundant_metadata = pit_.GetIrredundantMetadata(data.metadata(), recs);
+        // modify data message
+        data.set_metadata(irredundant_metadata);
+        // modify cached interest messages
+        pit_.AddMetadataToAll(irredundant_metadata);
+      } else {
+        recs = pit_.GetAllReceivers();
+      }
+
+      // send data message
+      if (data.metadata().size() > 0) {
+        SendData(data, recs);
+      }
+    }
   }
 
-  // send data message
-  if (data.metadata().size() > 0) {
-    SendData(data, recs);
-  }
+  // tracing
+  did_receive_data_message_callback_(
+    this,
+    from_ip,
+    to_ips,
+    data.nonce(),
+    data.hop_nonce(),
+    data.size(),
+    data.metadata()
+  );
 }
 
 void App::DataDiscovery() {
@@ -265,16 +283,19 @@ void App::NextSlot() {
 }
 
 void App::SendInterest(::pec::Interest interest) {
+  interest.set_sender(GetIp().Get());
   interest.set_hop_nonce(rand());
-  // interest.set_sender(this->GetNode()->GetId());
 
-  /*send_interest_message_callback_(
+  // tracing
+  send_interest_message_callback_(
     this,
+    GetIp(),
     interest.nonce(), 
+    interest.hop_nonce(),
     enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
                                  : ::pec::Interest::kSizeWithoutBloomFilter,
     interest.metadata()
-  );*/
+  );
 
   if (enable_collision_avoidance_) {
     network_adapter_.SendInterest(interest, max_backoff_);
@@ -283,18 +304,26 @@ void App::SendInterest(::pec::Interest interest) {
   }
 }
 
-void App::SendData(::pec::Data data, std::set<int> receivers) {
-  // NS_LOG_FUNCTION(this << data.nonce() << data.metadata().size());
-
+void App::SendData(::pec::Data data, std::set<uint32_t> receivers) {
+  data.set_receivers(receivers);
   data.set_hop_nonce(rand());
-
-  // data.set_receivers(receivers);
-
-  /*send_data_message_callback_(    this,
+  
+  // tracing
+  std::set<Ipv4Address> to_ips;
+  std::set<uint32_t>::iterator iter = data.receivers().begin();
+  while (iter != data.receivers().end()) {
+    to_ips.insert(Ipv4Address(*iter));
+    ++iter;
+  }
+  send_data_message_callback_(
+    this,
+    GetIp(),
+    to_ips,
     data.nonce(),
+    data.hop_nonce(),
     data.size(),
     data.metadata()
-  );*/
+  );
 
   if (enable_collision_avoidance_) {
     network_adapter_.SendData(data, max_backoff_);

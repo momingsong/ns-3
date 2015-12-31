@@ -15,9 +15,9 @@ class PendingInterestTable {
   bool Exist(int nonce);
   void AddInterest(Interest interest);
   void UpdateInterest(Interest interest);
-  std::set<int> GetIrredundantMetadata(std::set<int> metadata, std::set<int> &receivers);
+  std::set<int> GetIrredundantMetadata(std::set<int> metadata, std::set<uint32_t> &receivers);
   void AddMetadataToAll(std::set<int> metadata);
-  std::set<int> GetAllReceivers();
+  std::set<uint32_t> GetAllReceivers();
 
  private:
   std::map<int, Interest> table_; // nonce -> interest

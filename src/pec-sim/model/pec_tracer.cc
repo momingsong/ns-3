@@ -82,6 +82,7 @@ Ptr<Node> PecTracer::GetNodeFromIp(Ipv4Address address) {
 }
 
 void PecTracer::StartDataDiscovery(Ptr<App> app) {
+  NS_LOG_UNCOND("SDD: " << app->GetNode()->GetId());
   double start_time = Simulator::Now().GetSeconds();
   int index = tracers_.size();
   char indexChar[10];
@@ -93,10 +94,19 @@ void PecTracer::StartDataDiscovery(Ptr<App> app) {
 }
 
 void PecTracer::SendInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  NS_LOG_UNCOND("SI: " << app->GetNode()->GetId() << " "
+                       << fip_ss.str() << " "
+                       << nonce << " " 
+                       << hop_nonce << " "
+                       << size << " " 
+                       << metadata.size());
+
+/*
 std::ofstream output;
   output.open(std::string(prefix_ + "_SI.data").c_str(),std::fstream::out | std::fstream::app);
-  // NS_LOG_UNCOND("SI: " << app->GetNode()->GetId() << " " 
-  //                     << nonce << " " << size << " " << metadata.size());
   output<<"SI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
                        << nonce<<" "<<size<<" "<< metadata.size() <<std::endl;
 
@@ -104,11 +114,31 @@ std::ofstream output;
   interest_size_ += size;
   ++message_num_;
   ++interest_num_;
+*/
 }
 
-void PecTracer::SendData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
-  // NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " " 
-  //                     << nonce << " " << size << " " << metadata.size()<<" ");
+void PecTracer::SendData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  std::stringstream tip_ss;
+  std::set<Ipv4Address>::iterator iter = to_ips.begin();
+  iter->Print(tip_ss);
+  ++iter;
+  while (iter != to_ips.end()) {
+    tip_ss << "|";
+    iter->Print(tip_ss);
+    ++iter;
+  }
+  NS_LOG_UNCOND("SD: " << app->GetNode()->GetId() << " "
+                       << fip_ss.str() << " "
+                       << tip_ss.str() << " "
+                       << nonce << " " 
+                       << hop_nonce << " "
+                       << size << " " 
+                       << metadata.size());
+
+/*
 std::ofstream output;
   output.open(std::string(prefix_ + "_SD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"SD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
@@ -129,21 +159,50 @@ output<<std::endl;
   data_size_ += size;
   ++message_num_;
   ++data_num_;
+*/
 }
 
 void PecTracer::ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  NS_LOG_UNCOND("RI: " << app->GetNode()->GetId() << " " 
+                       << fip_ss.str() << " "
+                       << nonce << " " 
+                       << hop_nonce << " "
+                       << size << " "
+                       << metadata.size());
+
+/*
 std::ofstream output;
   output.open(std::string(prefix_ + "_RI.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"RI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
                        << nonce<<" "<<size<<" "<< metadata.size()<<std::endl;
-  // NS_LOG_UNCOND("RI: " << app->GetNode()->GetId() << " " 
-  //                      << nonce << " " << size << " " << metadata.size());
-
+*/
 }
 
-void PecTracer::WillReceiveData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
-  // NS_LOG_UNCOND("RD: " << app->GetNode()->GetId() << " " 
-  //                      << nonce << " " << size << " " << metadata.size());
+void PecTracer::WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  std::stringstream tip_ss;
+  std::set<Ipv4Address>::iterator iter = to_ips.begin();
+  iter->Print(tip_ss);
+  ++iter;
+  while (iter != to_ips.end()) {
+    tip_ss << "|";
+    iter->Print(tip_ss);
+    ++iter;
+  }
+  NS_LOG_UNCOND("WRD: " << app->GetNode()->GetId() << " " 
+                        << fip_ss.str() << " "
+                        << tip_ss.str() << " "
+                        << nonce << " " 
+                        << hop_nonce << " "
+                        << size << " "
+                        << metadata.size());
+
+/*
 std::ofstream output;
   output.open(std::string(prefix_ + "_RD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"RD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
@@ -159,11 +218,32 @@ output<<"Local Package: ";
 output<<*lit<<" ";
 	}
 output<<std::endl;
+*/
 }
 
-void PecTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, Ipv4Address to_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
-  // NS_LOG_UNCOND("RD: " << app->GetNode()->GetId() << " " 
-  //                      << nonce << " " << size << " " << metadata.size());
+void PecTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  std::stringstream tip_ss;
+  std::set<Ipv4Address>::iterator iter = to_ips.begin();
+  iter->Print(tip_ss);
+  ++iter;
+  while (iter != to_ips.end()) {
+    std::stringstream ss;
+    ss << "|";
+    iter->Print(ss);
+    ++iter;
+  }
+  NS_LOG_UNCOND("DRD: " << app->GetNode()->GetId() << " " 
+                        << fip_ss.str() << " "
+                        << tip_ss.str() << " "
+                        << nonce << " " 
+                        << hop_nonce << " "
+                        << size << " "
+                        << metadata.size());
+
+/*
 std::ofstream output;
   output.open(std::string(prefix_ + "_RD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"RD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" 
@@ -179,6 +259,7 @@ output<<"Local Package: ";
 output<<*lit<<" ";
   }
 output<<std::endl;
+*/
 }
 
 } // namespace pec

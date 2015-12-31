@@ -14,7 +14,7 @@ namespace pec {
 class NetworkAdapter {
  public:
   NetworkAdapter(Application &context, 
-                 ::pec::MessageReceiverInterface &receiver);
+                 MessageReceiverInterface &receiver);
   ~NetworkAdapter();
 
   void Init();
@@ -26,7 +26,7 @@ class NetworkAdapter {
   void Receive(Ptr<Socket> socket);
 
   Application &context_;
-  ::pec::MessageReceiverInterface &receiver_;
+  MessageReceiverInterface &receiver_;
   Ptr<Socket> send_socket_;
   Ptr<Socket> receive_socket_;
 

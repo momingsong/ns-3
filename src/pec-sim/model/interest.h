@@ -29,6 +29,9 @@ class Interest : public Block {
   void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
   int hop_nonce() { return hop_nonce_; }
 
+  void set_sender(uint32_t sender) { Reset(); sender_ = sender; }
+  uint32_t sender() { return sender_; }
+
   const std::set<int> &metadata() { return metadata_; }
 
  private:
@@ -37,6 +40,7 @@ class Interest : public Block {
 
   int nonce_;
   int hop_nonce_;
+  uint32_t sender_;
   std::set<int> metadata_;
 };
 
