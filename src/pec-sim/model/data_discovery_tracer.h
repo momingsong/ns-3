@@ -21,8 +21,10 @@ class DataDiscoveryTracer {
   void TraceApp(Ptr<App> app);
 
  private:
-  void ReceiveData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata);
+  void WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
 
+  
   std::string file_;
   std::string comment_;
   double start_time_;

@@ -23,15 +23,23 @@ DataDiscoveryTracer::~DataDiscoveryTracer() {
 
 void DataDiscoveryTracer::TraceApp(Ptr<App> app) {
   app->TraceConnectWithoutContext(
-    "ReceiveData", MakeCallback(&DataDiscoveryTracer::ReceiveData, this));
+    "WillReceiveData", MakeCallback(&DataDiscoveryTracer::WillReceiveData, this));
+  app->TraceConnectWithoutContext(
+    "DidReceiveData", MakeCallback(&DataDiscoveryTracer::DidReceiveData, this));
   metadata_num_ = app->local_metadata().size();
-  output_ << 0 << " " << metadata_num_ << " 0" << std::endl;
+  output_ << 0 << " " << metadata_num_ << " 0 0 I" << std::endl;
 }
 
-void DataDiscoveryTracer::ReceiveData(Ptr<App> app, int nonce, uint32_t size, const std::set<int> & metadata) {
+
+void DataDiscoveryTracer::WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata)
+{
   output_ << Simulator::Now().GetSeconds() - start_time_ << " "
-          << app->local_metadata().size() <<" " <<nonce<< std::endl;
+          << app->local_metadata().size() <<" " <<nonce<<" "<<hop_nonce<<" w"<<std::endl;
 }
-
+void DataDiscoveryTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata)
+{
+  output_ << Simulator::Now().GetSeconds() - start_time_ << " "
+          << app->local_metadata().size() <<" " <<nonce<<" "<<hop_nonce<<" d"<<std::endl;
+}
 } // namespace pec
 } // namespace ns3
