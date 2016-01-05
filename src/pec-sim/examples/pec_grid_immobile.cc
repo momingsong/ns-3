@@ -226,7 +226,6 @@ int main(int argc, char *argv[]) {
   Simulator::ScheduleWithContext(consumer_index, Seconds(1.0), &DataDiscovery, consumer);
   Simulator::Run();
   Simulator::Destroy();
-
   tracer.Output();
 
   time_t end_time;

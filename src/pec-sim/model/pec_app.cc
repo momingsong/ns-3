@@ -211,7 +211,7 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
       }
 
       // send data message
-      if (data.metadata().size() > 0) {
+      if (data.metadata().size() > 0 && recs.size() > 0) {
         SendData(data, recs);
       }
     }
