@@ -113,14 +113,12 @@ void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
     interest.hop_nonce(),
     enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
                                  : ::pec::Interest::kSizeWithoutBloomFilter,
-    interest.metadata()
+    interest.filter()
   );
-
   // loop detection
   if (pit_.Exist(interest.nonce()))
     return;
   pit_.AddInterest(interest);
-
   // redundancy detection
   std::set<int> irredundant_metadata;
   if (enable_redundancy_detection_) {
@@ -134,10 +132,8 @@ void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
     interest.AddMetadata(irredundant_metadata);
     pit_.UpdateInterest(interest);
   }
-
   // send interest message
   SendInterest(interest);
-
   // generate data messages
   std::vector< ::pec::Data> datas;
   if (enable_redundancy_detection_) {
@@ -153,7 +149,6 @@ void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
       datas = ::pec::Data::WrapMetadata(local_metadata_, -1);
     }
   }
-
   // send data messages
   std::set<uint32_t> recs;
   recs.insert(from_ip.Get());
@@ -163,7 +158,6 @@ void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
 }
 
 void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
-
   // tracing
   std::set<Ipv4Address> to_ips;
   std::set<uint32_t>::iterator iter = data.receivers().begin();
@@ -234,8 +228,6 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
 }
 
 void App::DataDiscovery() {
-  // NS_LOG_FUNCTION(this);
-  
   start_data_discovery_callback_(this);
 
   if (enable_multi_round_) {
@@ -246,7 +238,6 @@ void App::DataDiscovery() {
 }
 
 void App::RequestMetadata() {
-  // NS_LOG_FUNCTION(this);
   if (enable_redundancy_detection_) {
     ::pec::Interest interest(local_metadata_);
     SendInterest(interest);
@@ -257,7 +248,6 @@ void App::RequestMetadata() {
 }
 
 void App::NextRound(bool is_first_round) {
-  // NS_LOG_FUNCTION(this);
   if (is_first_round) {
     metadata_count_discovery_ = 0;
   }
@@ -273,7 +263,6 @@ void App::NextRound(bool is_first_round) {
 }
 
 void App::NextSlot() {
-  // NS_LOG_FUNCTION(this);
   if (window_.size() == mr_window_size_) {
     data_message_count_window_ -= window_.front();
     window_.pop();
@@ -312,9 +301,8 @@ void App::SendInterest(::pec::Interest interest) {
     interest.hop_nonce(),
     enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
                                  : ::pec::Interest::kSizeWithoutBloomFilter,
-    interest.metadata()
+    interest.filter()
   );
-
   if (enable_collision_avoidance_) {
     network_adapter_.SendInterest(interest, max_backoff_);
   } else {
@@ -351,27 +339,23 @@ void App::SendData(::pec::Data data, std::set<uint32_t> receivers) {
 }
 
 bool App::HasMetadata(int metadata) {
-  // NS_LOG_FUNCTION(this << metadata);
   return local_metadata_.find(metadata) != local_metadata_.end();
 }
 
 void App::DoInitialize() {
-  // NS_LOG_FUNCTION(this);
   Application::DoInitialize();
 }
 
 void App::DoDispose() {
-  // NS_LOG_FUNCTION(this);
   Application::DoDispose();
 }
 
 void App::StartApplication() {
-  // NS_LOG_FUNCTION(this);
   network_adapter_.Init();
  }
 
 void App::StopApplication() {
-  // NS_LOG_FUNCTION(this);
+
 }
 
 } // namespace pec

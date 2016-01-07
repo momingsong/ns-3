@@ -93,7 +93,7 @@ void PecTracer::StartDataDiscovery(Ptr<App> app) {
   list_ << index << " " << app->GetNode()->GetId() << " " << start_time << std::endl;
 }
 
-void PecTracer::SendInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+void PecTracer::SendInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const bloom_filter & filter) {
 
   std::stringstream fip_ss;
   from_ip.Print(fip_ss);
@@ -102,11 +102,11 @@ void PecTracer::SendInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int h
                        << nonce << " " 
                        << hop_nonce << " "
                        << size << " " 
-                       << metadata.size());
+                       << filter.size());
 
   std::ofstream output;
   output.open(std::string(prefix_ + "_SI.data").c_str(),std::fstream::out | std::fstream::app);
-  output<<"SI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" "<<size<<" "<< metadata.size() <<std::endl;
+  output<<"SI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" "<<size<<" "<< filter.size() <<std::endl;
 
   message_size_ += size;
   interest_size_ += size;
@@ -161,7 +161,7 @@ if(app->GetNode()->GetId() == 44)
   ++data_num_;
 }
 
-void PecTracer::ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
+void PecTracer::ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const bloom_filter & filter) {
 
   std::stringstream fip_ss;
   from_ip.Print(fip_ss);
@@ -170,10 +170,10 @@ void PecTracer::ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, in
                        << nonce << " " 
                        << hop_nonce << " "
                        << size << " "
-                       << metadata.size());
+                       << filter.size());
                 std::ofstream output;
                 output.open(std::string(prefix_ + "_RI.data").c_str(),std::fstream::out | std::fstream::app);
-                output<<"RI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" "<<size<<" "<< metadata.size() <<std::endl;
+                output<<"RI: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" "<<size<<" "<< filter.size() <<std::endl;
 }
 
 void PecTracer::WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {

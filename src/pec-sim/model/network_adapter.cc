@@ -49,7 +49,6 @@ void NetworkAdapter::Init() {
 }
 
 void NetworkAdapter::SendInterest(::pec::Interest &interest, double max_backoff) {
-  // NS_LOG_UNCOND("SendInterest: " << interest.message());
   Send(interest, max_backoff);
 }
 
@@ -64,13 +63,10 @@ void NetworkAdapter::SendData(::pec::Data &data, double max_backoff) {
 }
 
 void NetworkAdapter::Send(::pec::Block &message, double max_backoff) {
-  // NS_LOG_UNCOND("SendMessage");
-
   uint32_t len = message.GetWireLength();
   uint8_t *buf = new uint8_t[len];
   message.GetWire(buf, len);
   Ptr<Packet> packet = Create<Packet>(buf, len);
-
   if (max_backoff <= 0.0) {
     send_socket_->Send(packet);
   } else {

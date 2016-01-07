@@ -99,7 +99,7 @@ class App : public Application, public MessageReceiverInterface {
     int,          // Nonce
     int,          // Hop Nonce
     uint32_t,     // MessageSize
-    const std::set<int> & // MetadataSetReference
+    const bloom_filter & // BloomFilterReference
   > send_interest_message_callback_;
 
   TracedCallback<
@@ -118,7 +118,7 @@ class App : public Application, public MessageReceiverInterface {
     int,          // Nonce
     int,          // Hop Nonce
     uint32_t,     // MessageSize
-    const std::set<int> & // MetadataSetReference
+    const bloom_filter & // BloomFilterReference
   > receive_interest_message_callback_;
 
   TracedCallback<

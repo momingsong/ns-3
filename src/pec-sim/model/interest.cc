@@ -1,67 +1,121 @@
 #include "interest.h"
-
 namespace pec {
 
-Interest::Interest() { nonce_ = rand(); }
+int Interest::bf_size_max_;
+int Interest::bf_size_min_;
+double Interest::bf_fpp_;
+
+Interest::Interest() {
+  nonce_ = rand();
+  has_filter_ = false;
+}
 
 Interest::Interest(std::set<int> metadata) {
-  std::set<int>::iterator iter = metadata.begin();
-  while (iter != metadata.end()) {
-    metadata_.insert(*iter);
-    ++iter;
+  if (metadata.size() == 0) {
+    Interest();
+  } else {
+    bloom_parameters paras;
+    paras.maximum_size = bf_size_max_ * 8;
+    paras.minimum_size = bf_size_min_ * 8;
+    paras.false_positive_probability = bf_fpp_;
+    paras.projected_element_count = metadata.size();
+    paras.compute_optimal_parameters();
+    bloom_filter new_filter(paras);
+    filter_ = new_filter;
+    has_filter_ = true;
+
+    std::set<int>::iterator iter = metadata.begin();
+    while (iter != metadata.end()) {
+      int m = *iter++;
+      filter_.insert((char*)&m, sizeof(int));
+    }
+    nonce_ = rand();
+    
   }
-  nonce_ = rand();
 }
 
 bool Interest::HasMetadata(int metadata) {
-  return metadata_.find(metadata) != metadata_.end();
+  if (has_filter_)
+    return filter_.contains((char *)&metadata, sizeof(int));
+  else
+    return false;
 }
 
 void Interest::AddMetadata(int metadata) {
   Reset();
-  
-  metadata_.insert(metadata);
+  if (!has_filter_) {
+    bloom_parameters paras;
+    paras.maximum_size = bf_size_max_ * 8;
+    paras.minimum_size = bf_size_min_ * 8;
+    paras.false_positive_probability = bf_fpp_;
+    paras.projected_element_count = 1;
+    paras.compute_optimal_parameters();
+    bloom_filter new_filter(paras);
+    filter_ = new_filter;
+    has_filter_ = true;
+  }
+  filter_.insert((char *)&metadata, sizeof(int));
 }
 
 void Interest::AddMetadata(std::set<int> metadata) {
   Reset();
-
-  std::set<int>::iterator iter = metadata_.begin();
-  while (iter != metadata_.end()) {
-    metadata_.insert(*iter);
-    ++iter;
+  if (!has_filter_) {
+    bloom_parameters paras;
+    paras.maximum_size = bf_size_max_ * 8;
+    paras.minimum_size = bf_size_min_ * 8;
+    paras.false_positive_probability = bf_fpp_;
+    paras.projected_element_count = metadata.size();
+    paras.compute_optimal_parameters();
+    bloom_filter new_filter(paras);
+    filter_ = new_filter;
+    has_filter_ = true;
+  }
+  std::set<int>::iterator iter = metadata.begin();
+  while (iter != metadata.end()) {
+    int m = *iter++;
+    filter_.insert((char *)&m, sizeof(int));
   }
 }
 
 void Interest::Encode() {
   Reset();
 
-  wire_length_ = kTlvTypeLengthSize + sizeof(int) * (3 + metadata_.size());
+  wire_length_ = sizeof(TlvType) + sizeof(uint32_t) * 2 + sizeof(int) * 2 + sizeof(bool);
+  if (has_filter_)
+    wire_length_ += filter_.GetLength();
   wire_begin_ = new uint8_t[wire_length_];
 
-  TlvType type = kTlvInterest;
-  *((TlvType *)wire_begin_) = type;
-  *((uint32_t *)(wire_begin_ + kTlvTypeSize)) = wire_length_;
-  *((int *)(wire_begin_ + kTlvTypeLengthSize)) = nonce_;
-  *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int))) = hop_nonce_;
-  *((uint32_t *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2)) = sender_;
-  std::set<int>::iterator iter = metadata_.begin();
-  int i = 0;
-  while (iter != metadata_.end()) {
-    *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * (i++ + 3))) = *iter;
-    ++iter;
-  }
+  uint8_t *p = wire_begin_;
+  *((TlvType *)p) = kTlvInterest;
+  p += sizeof(TlvType);
+  *((uint32_t *)p) = wire_length_;
+  p += sizeof(uint32_t);
+  *((int *)p) = nonce_;
+  p += sizeof(int);
+  *((int *)p) = hop_nonce_;
+  p += sizeof(int);
+  *((uint32_t *)p) = sender_;
+  p += sizeof(uint32_t);
+  *((bool *)p) = has_filter_;
+  p += sizeof(bool);
+  if (has_filter_)
+    filter_.Encode(p);
 }
 
 void Interest::Decode() {
-  nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize));
-  hop_nonce_ = *((int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int)));
-  sender_ = *((uint32_t *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 2));
-  int *p = (int *)(wire_begin_ + kTlvTypeLengthSize + sizeof(int) * 3);
-  metadata_.clear();
-  while ((uint8_t *)p != wire_begin_ + wire_length_) {
-    metadata_.insert(*p);
-    ++p;
+  uint8_t *p = wire_begin_;
+  p += sizeof(TlvType);
+  p += sizeof(uint32_t);
+  nonce_ = *((int *)p);
+  p += sizeof(int);
+  hop_nonce_ = *((int *)p);
+  p += sizeof(int);
+  sender_ = *((uint32_t *)p);
+  p += sizeof(uint32_t);
+  has_filter_ = *((bool *)p);
+  p += sizeof(bool);
+  if (has_filter_) {
+    filter_.Decode(p);
   }
 }
 

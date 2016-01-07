@@ -53,6 +53,10 @@ int main(int argc, char *argv[]) {
   double mr_slot_size = 1.0;
   int mr_window_size = 5;
 
+  int bf_size_max = 50000;
+  int bf_size_min = 10000;
+  double bf_fpp = 0.01;
+
   // Parse commandline parameters
   CommandLine cmd;
   cmd.AddValue("tracePath", "Path of the output trace file", trace_path);
@@ -93,6 +97,15 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("multiRoundWindowSize",
                "Multi Round: Number of recent time slots to decide terminating a round in multi-round data discovery.",
                mr_window_size);
+  cmd.AddValue("bloomFilterSizeMax",
+               "Bloom Filter: Max size of bloom filter in bytes.",
+               bf_size_max);
+  cmd.AddValue("bloomFilterSizeMin",
+               "Bloom Filter: Min size of bloom filter in bytes.",
+               bf_size_min);
+  cmd.AddValue("bloomFilterFalsePositive",
+               "Bloom Filter: Expected probability of false positive.",
+               bf_fpp);
   cmd.Parse (argc, argv);
 
   // Log parameters
@@ -212,6 +225,7 @@ int main(int argc, char *argv[]) {
                      DoubleValue(mr_slot_size));
   Config::SetDefault("ns3::pec::App::MRWindowSize",
                      IntegerValue(mr_window_size));
+  ::pec::Interest::ConfigBloomFilter(bf_size_max, bf_size_min, bf_fpp);
 
   ns3::pec::AppHelper helper;
   helper.set_data_amount(data_amount);
