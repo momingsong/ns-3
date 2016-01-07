@@ -111,8 +111,7 @@ void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
     from_ip,
     interest.nonce(),
     interest.hop_nonce(),
-    enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
-                                 : ::pec::Interest::kSizeWithoutBloomFilter,
+    interest.GetWireLength(),
     interest.filter()
   );
   // loop detection
@@ -171,7 +170,7 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
     to_ips,
     data.nonce(),
     data.hop_nonce(),
-    data.size(),
+    data.GetWireLength(),
     data.metadata()
   );
 
@@ -222,7 +221,7 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
     to_ips,
     data.nonce(),
     data.hop_nonce(),
-    data.size(),
+    data.GetWireLength(),
     data.metadata()
   );
 }
@@ -299,8 +298,7 @@ void App::SendInterest(::pec::Interest interest) {
     GetIp(),
     interest.nonce(), 
     interest.hop_nonce(),
-    enable_redundancy_detection_ ? ::pec::Interest::kSizeWithBloomFilter 
-                                 : ::pec::Interest::kSizeWithoutBloomFilter,
+    interest.GetWireLength(),
     interest.filter()
   );
   if (enable_collision_avoidance_) {
@@ -327,7 +325,7 @@ void App::SendData(::pec::Data data, std::set<uint32_t> receivers) {
     to_ips,
     data.nonce(),
     data.hop_nonce(),
-    data.size(),
+    data.GetWireLength(),
     data.metadata()
   );
 

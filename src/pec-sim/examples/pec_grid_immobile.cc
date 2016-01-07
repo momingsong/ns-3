@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
   double mr_slot_size = 1.0;
   int mr_window_size = 5;
 
-  int bf_size_max = 50000;
+  int bf_size_max = 60000;
   int bf_size_min = 10000;
   double bf_fpp = 0.01;
 

@@ -13,8 +13,6 @@ namespace pec {
 
 class Interest : public Block {
  public:
-  static const uint32_t kSizeWithoutBloomFilter = 48;
-  static const uint32_t kSizeWithBloomFilter = 4144;
   Interest();
   Interest(std::set<int> metadata);
   Interest(const Interest &interest) : Block(interest) {
