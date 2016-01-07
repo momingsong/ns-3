@@ -61,6 +61,11 @@ TypeId App::GetTypeId() {
                     DoubleValue(1.0),
                     MakeDoubleAccessor(&App::mr_slot_size_),
                     MakeDoubleChecker<double>())
+      .AddAttribute("MRWindowSize",
+                    "Multi Round: Number of recent time slots to decide terminating a round in multi-round data discovery.",
+                    IntegerValue(5),
+                    MakeIntegerAccessor(&App::mr_window_size_),
+                    MakeIntegerChecker<int>())
 
       // Tracing
       .AddTraceSource("StartDataDiscovery",
@@ -100,7 +105,6 @@ App::App() : network_adapter_(*this, *this) {
 App::~App() { }
 
 void App::ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip) {
-
   // tracing
   receive_interest_message_callback_(
     this,
@@ -260,15 +264,29 @@ void App::NextRound(bool is_first_round) {
   metadata_count_round_ = 0;
   data_message_count_round_ = 0;
   data_message_count_slot_ = 0;
+  data_message_count_window_ = 0;
+  while (!window_.empty()) {
+    window_.pop();
+  }
   RequestMetadata();
   Simulator::Schedule(Seconds(mr_slot_size_), &App::NextSlot, this);
 }
 
 void App::NextSlot() {
   // NS_LOG_FUNCTION(this);
-  if ( data_message_count_slot_ == 0 ||
-      ((double)data_message_count_slot_) / ((double)data_message_count_round_)
-      <= mr_round_finish_threshold_) { // round finished
+  if (window_.size() == mr_window_size_) {
+    data_message_count_window_ -= window_.front();
+    window_.pop();
+  }
+  data_message_count_window_ += data_message_count_slot_;
+  window_.push(data_message_count_slot_);
+
+  if (window_.size() == mr_window_size_ &&
+      (data_message_count_window_ == 0 ||
+       ((double)data_message_count_window_) / ((double)data_message_count_round_)
+       <= mr_round_finish_threshold_
+      )
+     ) { // round finished
     if ( metadata_count_round_ == 0 ||
       ((double)metadata_count_round_) / ((double)metadata_count_discovery_)
       <= mr_discovery_finish_threshold_) { // data discovery finished

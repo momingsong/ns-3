@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
   double mr_round_finish_threshold = 0.0;
   double mr_discovery_finish_threshold = 0.0;
   double mr_slot_size = 1.0;
+  int mr_window_size = 5;
 
   // Parse commandline parameters
   CommandLine cmd;
@@ -89,6 +90,9 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("multiRoundSlotSize",
                "Multi Round: Size of a time slot in multi-round data discovery.",
                mr_slot_size);
+  cmd.AddValue("multiRoundWindowSize",
+               "Multi Round: Number of recent time slots to decide terminating a round in multi-round data discovery.",
+               mr_window_size);
   cmd.Parse (argc, argv);
 
   // Log parameters
@@ -206,6 +210,8 @@ int main(int argc, char *argv[]) {
                      DoubleValue(mr_discovery_finish_threshold));
   Config::SetDefault("ns3::pec::App::MRSlotSize",
                      DoubleValue(mr_slot_size));
+  Config::SetDefault("ns3::pec::App::MRWindowSize",
+                     IntegerValue(mr_window_size));
 
   ns3::pec::AppHelper helper;
   helper.set_data_amount(data_amount);

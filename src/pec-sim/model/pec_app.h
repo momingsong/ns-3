@@ -77,12 +77,15 @@ class App : public Application, public MessageReceiverInterface {
   double mr_round_finish_threshold_; // TH_R
   double mr_discovery_finish_threshold_; // TH_D
   double mr_slot_size_;
+  int mr_window_size_;
 
   // multi-round state information
   int metadata_count_discovery_;
   int metadata_count_round_;
   int data_message_count_round_;
   int data_message_count_slot_;
+  int data_message_count_window_;
+  std::queue<int> window_;
 
   // 
   // Tracing
