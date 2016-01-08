@@ -29,6 +29,9 @@
 #include <vector>
 #include <cstdlib>
 
+ typedef  unsigned int uint32_t;
+ typedef unsigned char uint8_t;
+
 
 static const std::size_t bits_per_char = 0x08;    // 8 bits in 1 char(unsigned)
 static const unsigned char bit_mask[bits_per_char] = {
@@ -217,7 +220,7 @@ public:
     std::copy(p, p + raw_table_size_, bit_table_);
     p += raw_table_size_;
     salt_.clear();
-    for (int i = 0; i < salt_count_; ++i) {
+    for (size_t i = 0; i < salt_count_; ++i) {
       salt_.push_back(*((bloom_type *)p));
       p += sizeof(bloom_type);
     }

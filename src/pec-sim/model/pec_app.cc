@@ -262,14 +262,14 @@ void App::NextRound(bool is_first_round) {
 }
 
 void App::NextSlot() {
-  if (window_.size() == mr_window_size_) {
+  if (window_.size() == (uint32_t)mr_window_size_) {
     data_message_count_window_ -= window_.front();
     window_.pop();
   }
   data_message_count_window_ += data_message_count_slot_;
   window_.push(data_message_count_slot_);
 
-  if (window_.size() == mr_window_size_ &&
+  if (window_.size() == (uint32_t)mr_window_size_ &&
       (data_message_count_window_ == 0 ||
        ((double)data_message_count_window_) / ((double)data_message_count_round_)
        <= mr_round_finish_threshold_
