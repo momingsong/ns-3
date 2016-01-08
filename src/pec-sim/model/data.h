@@ -14,14 +14,12 @@ class Data : public Block {
  public:
   Data();
   Data(std::set<int> metadata);
+  Data(const Data &data) : Block(data) {
+    receivers_ = data.receivers_;
+    metadata_ = data.metadata_;
+  }
 
   static std::vector<Data> WrapMetadata(std::set<int> metadata, int num);
-
-  void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
-  int nonce() { return nonce_; }
-
-  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
-  int hop_nonce() { return hop_nonce_; }
 
   void set_metadata(std::set<int> metadata) { Reset(); metadata_ = metadata; }
   const std::set<int> &metadata() { return metadata_; }
@@ -32,8 +30,7 @@ class Data : public Block {
  private:
   void Encode();
   void Decode();
-  int nonce_;
-  int hop_nonce_;
+
   std::set<uint32_t> receivers_;
   std::set<int> metadata_;
 };

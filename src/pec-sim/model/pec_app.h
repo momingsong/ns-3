@@ -27,6 +27,9 @@ class App : public Application, public MessageReceiverInterface {
 
   virtual void ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip);
   virtual void ReceiveData(::pec::Data data, Ipv4Address from_ip);
+  virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from);
+  virtual void ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from);
+  virtual void RetransmitCallback(int nonce, int hop_nonce);
 
   void AddMetadata(int metadata) { local_metadata_.insert(metadata); }
   bool HasMetadata(int metadata);
@@ -141,6 +144,25 @@ class App : public Application, public MessageReceiverInterface {
     const std::set<int> & // MetadataSetReference
   > did_receive_data_message_callback_;
 
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    int,          // Nonce
+    int,          // HopNonce
+    Ipv4Address   // FromIpAddress
+  > send_ack_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    int,          // Nonce
+    int,          // HopNonce
+    Ipv4Address   // FromIpAddress
+  > receive_ack_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    int,          // Nonce
+    int          // HopNonce
+  > retransmit_callback_;
 };
 
 } // namespace pec

@@ -91,7 +91,20 @@ TypeId App::GetTypeId() {
       .AddTraceSource("DidReceiveData",
                       "Did receive datas message from the network",
                       MakeTraceSourceAccessor(&App::did_receive_data_message_callback_),
-                      "ns3::pec::App::ReceiveData");
+                      "ns3::pec::App::ReceiveData")
+      .AddTraceSource("SendAck",
+                      "Send ack to the network",
+                      MakeTraceSourceAccessor(&App::send_ack_callback_),
+                      "ns3::pec::App::SendAck")
+      .AddTraceSource("ReceiveAck",
+                      "Receive ack from the network",
+                      MakeTraceSourceAccessor(&App::receive_ack_callback_),
+                      "ns3::pec::App::ReceiveAck")
+      .AddTraceSource("Retransmit",
+                      "Retransmit message",
+                      MakeTraceSourceAccessor(&App::retransmit_callback_),
+                      "ns3::pec::App::Retransmit");
+      
   return tid;
 }
 
@@ -174,6 +187,12 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
     data.metadata()
   );
 
+  // ACK
+  if (data.receivers().find(GetIp().Get()) != data.receivers().end()) {
+    ::pec::Ack ack(data.nonce(), data.hop_nonce(), GetIp().Get());
+    network_adapter_.SendAck(ack);
+  }
+
   // loop detection
   if (data_nonces_.find(data.nonce()) == data_nonces_.end()) {
     data_nonces_.insert(data.nonce());
@@ -224,6 +243,18 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
     data.GetWireLength(),
     data.metadata()
   );
+}
+
+void App::SendAckCallback(int nonce, int hop_nonce, uint32_t from) {
+  send_ack_callback_(this, nonce, hop_nonce, Ipv4Address(from));
+}
+
+void App::ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from) {
+  receive_ack_callback_(this, nonce, hop_nonce, Ipv4Address(from));
+}
+
+void App::RetransmitCallback(int nonce, int hop_nonce) {
+  retransmit_callback_(this, nonce, hop_nonce);
 }
 
 void App::DataDiscovery() {

@@ -15,6 +15,7 @@ enum TlvType {
 
   kTlvInterest = 1,
   kTlvData = 2,
+  kTlvAck = 3,
 };
 
 const uint32_t kTlvTypeSize = sizeof(TlvType);

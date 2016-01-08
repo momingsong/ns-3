@@ -39,7 +39,8 @@ def build(bld):
         'model/pending_interest_table.h',
         'model/data_discovery_tracer.h',
         'model/pec_tracer.h',
-        'model/bloom_filter.h'
+        'model/bloom_filter.h',
+        'model/ack.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

@@ -16,8 +16,6 @@ class Interest : public Block {
   Interest();
   Interest(std::set<int> metadata);
   Interest(const Interest &interest) : Block(interest) {
-    nonce_ = interest.nonce_;
-    hop_nonce_ = interest.hop_nonce_;
     sender_ = interest.sender_;
     has_filter_ = interest.has_filter_;
     filter_ = interest.filter_;
@@ -35,12 +33,6 @@ class Interest : public Block {
 
   void AddMetadata(std::set<int> metadata);
 
-  void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
-  int nonce() { return nonce_; }
-
-  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
-  int hop_nonce() { return hop_nonce_; }
-
   void set_sender(uint32_t sender) { Reset(); sender_ = sender; }
   uint32_t sender() { return sender_; }
 
@@ -54,8 +46,6 @@ class Interest : public Block {
   static int bf_size_min_;
   static double bf_fpp_;
 
-  int nonce_;
-  int hop_nonce_;
   uint32_t sender_;
 
   bloom_filter filter_;

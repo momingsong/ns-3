@@ -9,14 +9,14 @@
 namespace ns3 {
 namespace pec {
 
-void SendPacket(Ptr<Socket> socket, Ptr<Packet> packet) {
-  socket->Send(packet);
-}
-
 const uint16_t kPecUdpPort = 7320;
 const InetSocketAddress kPecUdpAddress = InetSocketAddress(
                                              Ipv4Address("255.255.255.255"),
                                              kPecUdpPort);
+
+bool NetworkAdapter::enable_retransmit_ = true;
+double NetworkAdapter::timeout_ = 0.5;
+int NetworkAdapter::retry_ = 3;
 
 NetworkAdapter::NetworkAdapter(Application &context,
                                MessageReceiverInterface &receiver)
@@ -48,31 +48,53 @@ void NetworkAdapter::Init() {
   receive_socket_->SetRecvCallback(MakeCallback(&NetworkAdapter::Receive, this));
 }
 
-void NetworkAdapter::SendInterest(::pec::Interest &interest, double max_backoff) {
-  Send(interest, max_backoff);
-}
-
-void NetworkAdapter::SendData(::pec::Data &data, double max_backoff) {
-  /*
-  NS_LOG_UNCOND("SendData: " << data.nonce());
-  for (int i = 0; i < data.metadata().size(); ++i) {
-    NS_LOG_UNCOND(data.metadata()[i]);
+void NetworkAdapter::SendInterest(::pec::Interest interest, double max_backoff) {
+  if (max_backoff <= 0.0) {
+    Send(interest, false, 0);
+  } else {
+    double backoff = (rand() % 10000) / 10000.0 * max_backoff;
+    Simulator::Schedule(Seconds(backoff), &NetworkAdapter::Send, this, interest, false, 0);
   }
-  */
-  Send(data, max_backoff);
 }
 
-void NetworkAdapter::Send(::pec::Block &message, double max_backoff) {
+void NetworkAdapter::SendData(::pec::Data data, double max_backoff) {
+  waiting_ack_.insert(std::pair<int, std::set<uint32_t> >(data.hop_nonce(), data.receivers()));
+  if (max_backoff <= 0.0) {
+    Send(data, true, 0);
+  } else {
+    double backoff = (rand() % 10000) / 10000.0 * max_backoff;
+    Simulator::Schedule(Seconds(backoff), &NetworkAdapter::Send, this, data, true, 0);
+  }
+}
+
+void NetworkAdapter::SendAck(::pec::Ack ack) {
+  if (enable_retransmit_) {
+    receiver_.SendAckCallback(ack.nonce(), ack.hop_nonce(), ack.from());
+    Send(ack, false, 0);
+  }
+}
+
+void NetworkAdapter::Send(::pec::Block &message, bool retransmit, int retry) {
   uint32_t len = message.GetWireLength();
   uint8_t *buf = new uint8_t[len];
   message.GetWire(buf, len);
   Ptr<Packet> packet = Create<Packet>(buf, len);
-  if (max_backoff <= 0.0) {
-    send_socket_->Send(packet);
+  send_socket_->Send(packet);
+  delete [] buf;
+  if (enable_retransmit_ && retransmit) {
+    Simulator::Schedule(Seconds(timeout_), &NetworkAdapter::Retransmit, this, message, retry + 1);
+  }
+}
+
+void NetworkAdapter::Retransmit(::pec::Block &message, int retry) {
+  if (retry >= retry_)
+    return;
+
+  if (!waiting_ack_.find(message.hop_nonce())->second.empty()) {
+    receiver_.RetransmitCallback(message.nonce(), message.hop_nonce());
+    Send(message, true, retry);
   } else {
-    double backoff = (rand() % 10000) / 10000.0 * max_backoff;
-    Simulator::Schedule(Seconds(backoff), &SendPacket, send_socket_, packet);
-    delete [] buf;
+    waiting_ack_.erase(message.hop_nonce());
   }
 }
 
@@ -93,8 +115,19 @@ void NetworkAdapter::Receive(Ptr<Socket> socket) {
       ::pec::Data data;
       data.DecodeFromBuffer(buf, len);
       receiver_.ReceiveData(data, from_ip);
+    } else if (type == ::pec::kTlvAck) {
+      ::pec::Ack ack;
+      ack.DecodeFromBuffer(buf, len);
+      ReceiveAck(ack);
     }
     delete [] buf;
+  }
+}
+
+void NetworkAdapter::ReceiveAck(::pec::Ack ack) {
+  receiver_.ReceiveAckCallback(ack.nonce(), ack.hop_nonce(), ack.from());
+  if (waiting_ack_.find(ack.hop_nonce()) != waiting_ack_.end()) {
+    waiting_ack_.find(ack.hop_nonce())->second.erase(ack.from());
   }
 }
 

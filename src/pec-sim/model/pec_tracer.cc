@@ -53,6 +53,15 @@ void PecTracer::TraceApps(ApplicationContainer apps) {
     app->TraceConnectWithoutContext(
       "DidReceiveData", 
       MakeCallback(&PecTracer::DidReceiveData, this));
+    app->TraceConnectWithoutContext(
+      "SendAck", 
+      MakeCallback(&PecTracer::SendAck, this));
+    app->TraceConnectWithoutContext(
+      "ReceiveAck", 
+      MakeCallback(&PecTracer::ReceiveAck, this));
+    app->TraceConnectWithoutContext(
+      "Retransmit", 
+      MakeCallback(&PecTracer::Retransmit, this));
   }
 }
 
@@ -259,5 +268,30 @@ output<<*lit<<" ";
 output<<std::endl;
 }
 }
+
+void PecTracer::SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip) {
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  NS_LOG_UNCOND("SA: " << app->GetNode()->GetId() << " "
+                       << nonce << " "
+                       << hop_nonce << " "
+                       << fip_ss.str());
+}
+
+void PecTracer::ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip) {
+  std::stringstream fip_ss;
+  from_ip.Print(fip_ss);
+  NS_LOG_UNCOND("RA: " << app->GetNode()->GetId() << " "
+                       << nonce << " "
+                       << hop_nonce << " "
+                       << fip_ss.str());
+}
+
+void PecTracer::Retransmit(Ptr<App> app, int nonce, int hop_nonce) {
+  NS_LOG_UNCOND("RT: " << app->GetNode()->GetId() << " "
+                       << nonce << " "
+                       << hop_nonce);
+}
+
 } // namespace pec
 } // namespace ns3

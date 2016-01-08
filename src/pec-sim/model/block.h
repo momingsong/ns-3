@@ -21,14 +21,23 @@ class Block {
   void GetWire(uint8_t *buffer, uint32_t buffer_size);
   void DecodeFromBuffer(const uint8_t *buffer, uint32_t buffer_size);
 
+  void set_nonce(int nonce) { Reset(); nonce_ = nonce; }
+  int nonce() { return nonce_; }
+
+  void set_hop_nonce(int hop_nonce) { Reset(); hop_nonce_ = hop_nonce; }
+  int hop_nonce() { return hop_nonce_; }
+
  protected:
   void Reset();
-  virtual void Encode() = 0;
-  virtual void Decode() = 0;
+  virtual void Encode();
+  virtual void Decode();
 
   uint32_t wire_length_;
   uint8_t *wire_begin_;
   bool has_wire_;
+
+  int nonce_;
+  int hop_nonce_;
 };
 
 } // namespace pec

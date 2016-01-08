@@ -32,6 +32,9 @@ class PecTracer {
   void ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const bloom_filter & filter);
   void WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
   void DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
+  void SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
+  void ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
+  void Retransmit(Ptr<App> app, int nonce, int hop_nonce);
 
   std::string prefix_;
   std::string comment_;

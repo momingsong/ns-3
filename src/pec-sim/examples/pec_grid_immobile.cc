@@ -16,10 +16,6 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("PecSimple");
 
-void DataDiscovery(Ptr<ns3::pec::App> consumer) {
-  consumer->DataDiscovery();
-}
-
 int main(int argc, char *argv[]) {
 
   LogComponentEnable("pec.App", LOG_LEVEL_ALL);
@@ -56,6 +52,10 @@ int main(int argc, char *argv[]) {
   int bf_size_max = 60000;
   int bf_size_min = 10000;
   double bf_fpp = 0.01;
+
+  bool enable_retransmit = true;
+  double rt_timeout = 0.5;
+  int rt_retry = 3;
 
   // Parse commandline parameters
   CommandLine cmd;
@@ -106,6 +106,15 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("bloomFilterFalsePositive",
                "Bloom Filter: Expected probability of false positive.",
                bf_fpp);
+  cmd.AddValue("enableRetransmit",
+               "Enable retransmit.",
+               enable_retransmit);
+  cmd.AddValue("retransmitTimeout",
+               "Retransmit: Time in seconds waiting for ACK before retransmiting.",
+               rt_timeout);
+  cmd.AddValue("retransmitRetry",
+               "Retransmit: max time trying to send one message.",
+               rt_retry);
   cmd.Parse (argc, argv);
 
   // Log parameters
@@ -125,7 +134,14 @@ int main(int argc, char *argv[]) {
          << "# enableMultiRound=" << enable_multi_round << std::endl
          << "# multiRoundRoundFinishThreshold=" << mr_round_finish_threshold << std::endl
          << "# multiRoundDiscoveryFinishThreshold=" << mr_discovery_finish_threshold << std::endl
-         << "# multiRoundSlotSize=" << mr_slot_size << std::endl;
+         << "# multiRoundSlotSize=" << mr_slot_size << std::endl
+         << "# multiRoundWindowSize=" << mr_window_size << std::endl
+         << "# bloomFilterSizeMax=" << bf_size_max << std::endl
+         << "# bloomFilterSizeMin=" << bf_size_min << std::endl
+         << "# bloomFilterFalsePositive=" << bf_fpp << std::endl
+         << "# enableRetransmit=" << enable_retransmit << std::endl
+         << "# retransmitTimeout=" << rt_timeout << std::endl
+         << "# retransmitRetry=" << rt_retry << std::endl;
   std::string parameters = stream.str();
   std::cout << parameters;
 
@@ -226,6 +242,7 @@ int main(int argc, char *argv[]) {
   Config::SetDefault("ns3::pec::App::MRWindowSize",
                      IntegerValue(mr_window_size));
   ::pec::Interest::ConfigBloomFilter(bf_size_max, bf_size_min, bf_fpp);
+  ::ns3::pec::NetworkAdapter::ConfigRetransmit(enable_retransmit, rt_timeout, rt_retry);
 
   ns3::pec::AppHelper helper;
   helper.set_data_amount(data_amount);
@@ -243,7 +260,7 @@ int main(int argc, char *argv[]) {
   time(&begin_time);
 
   Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
-  Simulator::ScheduleWithContext(consumer_index, Seconds(1.0), &DataDiscovery, consumer);
+  Simulator::ScheduleWithContext(consumer_index, Seconds(1.0), &ns3::pec::App::DataDiscovery, consumer);
   Simulator::Run();
   Simulator::Destroy();
   tracer.Output();

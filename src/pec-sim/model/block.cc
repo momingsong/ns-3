@@ -8,7 +8,10 @@ Block::Block() : wire_length_(0), wire_begin_(NULL), has_wire_(false) { }
 Block::Block(const Block &block)
   : wire_length_(0),
     wire_begin_(NULL),
-    has_wire_(false) { }
+    has_wire_(false) { 
+  nonce_ = block.nonce_;
+  hop_nonce_ = block.hop_nonce_;
+}
 
 Block::~Block() {
   if (wire_begin_ != NULL)
@@ -51,5 +54,9 @@ void Block::Reset() {
   wire_length_ = 0;
   has_wire_ = false;
 }
+
+void Block::Encode() { }
+
+void Block::Decode() { }
 
 } // namespace pec
