@@ -34,7 +34,7 @@ class NetworkAdapter {
 
  private:
   void Send(::pec::Block &message, bool retransmit, int retry);
-  void Retransmit(::pec::Block &message, int retry);
+  void Retransmit(::pec::Data& message, int retry);
   void Receive(Ptr<Socket> socket);
   void ReceiveAck(::pec::Ack ack);
 

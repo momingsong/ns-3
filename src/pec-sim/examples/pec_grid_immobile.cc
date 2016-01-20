@@ -57,6 +57,8 @@ int main(int argc, char *argv[]) {
   double rt_timeout = 0.5;
   int rt_retry = 3;
 
+  bool enable_consumer_log = true;
+
   // Parse commandline parameters
   CommandLine cmd;
   cmd.AddValue("tracePath", "Path of the output trace file", trace_path);
@@ -115,6 +117,9 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("retransmitRetry",
                "Retransmit: max time trying to send one message.",
                rt_retry);
+  cmd.AddValue("enableConsumerLog",
+                "Enable the detailed log for the consumer received package",
+                enable_consumer_log);
   cmd.Parse (argc, argv);
 
   // Log parameters

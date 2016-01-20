@@ -20,6 +20,10 @@ PecTracer::PecTracer(std::string prefix, std::string comment,
   interest_size_ = 0;
   data_size_ = 0;
 
+  //for log use
+  consumer_index_ = 0;
+  consumer_log_ = false;
+
   list_.open(std::string(prefix_+"_list.data").c_str());
 }
 
@@ -276,6 +280,9 @@ void PecTracer::SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from
                        << nonce << " "
                        << hop_nonce << " "
                        << fip_ss.str());
+  std::ofstream output;
+  output.open(std::string(prefix_ + "_SK.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"SK: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<std::endl;
 }
 
 void PecTracer::ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip) {
@@ -285,12 +292,18 @@ void PecTracer::ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address f
                        << nonce << " "
                        << hop_nonce << " "
                        << fip_ss.str());
+  std::ofstream output;
+  output.open(std::string(prefix_ + "_RK.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"RK: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<std::endl;
 }
 
 void PecTracer::Retransmit(Ptr<App> app, int nonce, int hop_nonce) {
   NS_LOG_UNCOND("RT: " << app->GetNode()->GetId() << " "
                        << nonce << " "
                        << hop_nonce);
+  std::ofstream output;
+  output.open(std::string(prefix_ + "_T.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"T: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<std::endl;
 }
 
 } // namespace pec

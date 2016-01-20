@@ -80,16 +80,17 @@ void NetworkAdapter::Send(::pec::Block &message, bool retransmit, int retry) {
   message.GetWire(buf, len);
   Ptr<Packet> packet = Create<Packet>(buf, len);
   send_socket_->Send(packet);
-  delete [] buf;
+  ::pec::Block b(message);
+    
   if (enable_retransmit_ && retransmit) {
-    Simulator::Schedule(Seconds(timeout_), &NetworkAdapter::Retransmit, this, message, retry + 1);
+    Simulator::Schedule(Seconds(timeout_), &NetworkAdapter::Retransmit, this, (::pec::Data&)message, retry + 1);
   }
+  //delete [] buf;
 }
 
-void NetworkAdapter::Retransmit(::pec::Block &message, int retry) {
+void NetworkAdapter::Retransmit(::pec::Data &message, int retry) {
   if (retry >= retry_)
     return;
-
   if (!waiting_ack_.find(message.hop_nonce())->second.empty()) {
     receiver_.RetransmitCallback(message.nonce(), message.hop_nonce());
     Send(message, true, retry);

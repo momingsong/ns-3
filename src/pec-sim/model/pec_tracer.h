@@ -22,6 +22,7 @@ class PecTracer {
 
   void TraceApps(ApplicationContainer apps);
   void Output();
+  void SetConsumerLog(int consumer_index, bool consumer_log);
 
  private:
   Ptr<Node> GetNodeFromIp(Ipv4Address address);
@@ -52,8 +53,16 @@ class PecTracer {
   uint32_t message_size_;
   uint32_t interest_size_;
   uint32_t data_size_;
+  int consumer_index_;//Only for log use
+  bool consumer_log_;
 
 };
+
+inline void PecTracer::SetConsumerLog(int consumer_index, bool consumer_log)
+{
+  consumer_index = consumer_index_;
+  consumer_log = consumer_log_;
+}
 
 } // namespace pec
 } // namespace ns3
