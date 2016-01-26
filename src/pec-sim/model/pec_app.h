@@ -27,9 +27,9 @@ class App : public Application, public MessageReceiverInterface {
 
   virtual void ReceiveInterest(::pec::Interest interest, Ipv4Address from_ip);
   virtual void ReceiveData(::pec::Data data, Ipv4Address from_ip);
-  virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from);
+  virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from, uint32_t size);
   virtual void ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from);
-  virtual void RetransmitCallback(int nonce, int hop_nonce);
+  virtual void RetransmitCallback(int nonce, int hop_nonce, uint32_t size);
   virtual void SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
   virtual void ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
 
@@ -150,7 +150,8 @@ class App : public Application, public MessageReceiverInterface {
     Ptr<App>,     // AppPointer
     int,          // Nonce
     int,          // HopNonce
-    Ipv4Address   // FromIpAddress
+    Ipv4Address,   // FromIpAddress
+    uint32_t      // ACK packet size
   > send_ack_callback_;
 
   TracedCallback<
@@ -163,7 +164,8 @@ class App : public Application, public MessageReceiverInterface {
   TracedCallback<
     Ptr<App>,     // AppPointer
     int,          // Nonce
-    int          // HopNonce
+    int,          // HopNonce
+    uint32_t      // Message size
   > retransmit_callback_;
 
   TracedCallback<

@@ -253,16 +253,16 @@ void App::ReceiveData(::pec::Data data, Ipv4Address from_ip) {
   );
 }
 
-void App::SendAckCallback(int nonce, int hop_nonce, uint32_t from) {
-  send_ack_callback_(this, nonce, hop_nonce, Ipv4Address(from));
+void App::SendAckCallback(int nonce, int hop_nonce, uint32_t from, uint32_t size) {
+  send_ack_callback_(this, nonce, hop_nonce, Ipv4Address(from), size);
 }
 
 void App::ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from) {
   receive_ack_callback_(this, nonce, hop_nonce, Ipv4Address(from));
 }
 
-void App::RetransmitCallback(int nonce, int hop_nonce) {
-  retransmit_callback_(this, nonce, hop_nonce);
+void App::RetransmitCallback(int nonce, int hop_nonce, uint32_t size) {
+  retransmit_callback_(this, nonce, hop_nonce, size);
 }
 
 void App::SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {

@@ -78,7 +78,7 @@ void NetworkAdapter::SendData(::pec::Data data, double max_backoff) {
 
 void NetworkAdapter::SendAck(::pec::Ack ack) {
   if (enable_retransmit_) {
-    receiver_.SendAckCallback(ack.nonce(), ack.hop_nonce(), ack.from());
+    receiver_.SendAckCallback(ack.nonce(), ack.hop_nonce(), ack.from(), ack.GetWireLength());
     Send(ack, false, 0);
   }
 }
@@ -124,7 +124,7 @@ void NetworkAdapter::Retransmit(::pec::Data &message, int retry) {
     return;
   if (!waiting_ack_.find(message.hop_nonce())->second.empty()) {
     message.set_receivers(waiting_ack_.find(message.hop_nonce())->second);
-    receiver_.RetransmitCallback(message.nonce(), message.hop_nonce());
+    receiver_.RetransmitCallback(message.nonce(), message.hop_nonce(), message.GetWireLength());
     Send(message, true, retry);
   } else {
     waiting_ack_.erase(message.hop_nonce());

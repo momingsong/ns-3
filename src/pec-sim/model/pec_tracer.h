@@ -33,9 +33,9 @@ class PecTracer {
   void ReceiveInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const bloom_filter & filter);
   void WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
   void DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata);
-  void SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
+  void SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip, uint32_t size);
   void ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
-  void Retransmit(Ptr<App> app, int nonce, int hop_nonce);
+  void Retransmit(Ptr<App> app, int nonce, int hop_nonce, uint32_t size);
   void SendECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
   void ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
 
@@ -52,9 +52,11 @@ class PecTracer {
   int message_num_;
   int interest_num_;
   int data_num_;
+  int ack_num_;
   uint32_t message_size_;
   uint32_t interest_size_;
   uint32_t data_size_;
+  uint32_t ack_size_;
   int consumer_index_;//Only for log use
   bool consumer_log_;
 
