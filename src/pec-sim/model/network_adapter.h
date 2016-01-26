@@ -11,6 +11,8 @@
 #include "data.h"
 #include "ack.h"
 #include "message_receiver_interface.h"
+#include "ec_data.h"
+#include "erasure_code.h"
 
 namespace ns3 {
 namespace pec {
@@ -27,6 +29,11 @@ class NetworkAdapter {
     retry_ = retry;
   }
 
+  static void ConfigErasureCoding(bool enable_erasure_code, int block_size, double redundancy) {
+    enable_erasure_code_ = enable_erasure_code;
+    ::pec::ErasureCode::ConfigErasureCode(block_size, redundancy);
+  }
+
   void Init();
   void SendInterest(::pec::Interest interest, double max_backoff);
   void SendData(::pec::Data data, double max_backoff);
@@ -34,13 +41,18 @@ class NetworkAdapter {
 
  private:
   void Send(::pec::Block &message, bool retransmit, int retry);
+  void ECSend(::pec::Data &data, bool retransmit, int retry);
   void Retransmit(::pec::Data& message, int retry);
+  void ECRetransmit(::pec::Data &ddata, int retry);
   void Receive(Ptr<Socket> socket);
   void ReceiveAck(::pec::Ack ack);
+  void ReceiveECData(::pec::ECData ec_data, Ipv4Address from_ip);
 
   static bool enable_retransmit_;
   static double timeout_;
   static int retry_;
+
+  static bool enable_erasure_code_;
 
   Application &context_;
   MessageReceiverInterface &receiver_;
@@ -48,6 +60,9 @@ class NetworkAdapter {
   Ptr<Socket> receive_socket_;
 
   std::map<int, std::set<uint32_t> > waiting_ack_; // hop_nonce -> receivers
+
+  std::map<int, bool> ec_decoded_;  // hop_nonce -> is_decoded
+  std::map<int, std::vector< ::pec::ECData> > ec_received_;  // hop_nonce -> received_ec_data_list
 };
 
 } // namespace pec

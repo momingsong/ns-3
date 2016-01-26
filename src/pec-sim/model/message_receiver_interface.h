@@ -17,6 +17,8 @@ class MessageReceiverInterface {
   virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from) = 0;
   virtual void ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from) = 0;
   virtual void RetransmitCallback(int nonce, int hop_nonce) = 0;
+  virtual void SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) = 0;
+  virtual void ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) = 0;
 };
 
 } // namespace pec

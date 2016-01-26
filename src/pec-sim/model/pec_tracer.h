@@ -36,6 +36,8 @@ class PecTracer {
   void SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
   void ReceiveAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip);
   void Retransmit(Ptr<App> app, int nonce, int hop_nonce);
+  void SendECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
+  void ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
 
   std::string prefix_;
   std::string comment_;

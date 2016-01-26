@@ -103,7 +103,15 @@ TypeId App::GetTypeId() {
       .AddTraceSource("Retransmit",
                       "Retransmit message",
                       MakeTraceSourceAccessor(&App::retransmit_callback_),
-                      "ns3::pec::App::Retransmit");
+                      "ns3::pec::App::Retransmit")
+      .AddTraceSource("SendECData",
+                      "Send erasure coding data to the network",
+                      MakeTraceSourceAccessor(&App::send_ec_data_callback_),
+                      "ns3::pec::App::SendECData")
+      .AddTraceSource("ReceiveECData",
+                      "Receive erasure coding data from the network",
+                      MakeTraceSourceAccessor(&App::receive_ec_data_callback_),
+                      "ns3::pec::App::ReceiveECData");
       
   return tid;
 }
@@ -255,6 +263,14 @@ void App::ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from) {
 
 void App::RetransmitCallback(int nonce, int hop_nonce) {
   retransmit_callback_(this, nonce, hop_nonce);
+}
+
+void App::SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+  send_ec_data_callback_(this, nonce, hop_nonce, k, m, idx, len);
+}
+
+void App::ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+  receive_ec_data_callback_(this, nonce, hop_nonce, k, m, idx, len);
 }
 
 void App::DataDiscovery() {

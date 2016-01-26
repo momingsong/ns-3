@@ -30,6 +30,8 @@ class App : public Application, public MessageReceiverInterface {
   virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from);
   virtual void ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from);
   virtual void RetransmitCallback(int nonce, int hop_nonce);
+  virtual void SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
+  virtual void ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
 
   void AddMetadata(int metadata) { local_metadata_.insert(metadata); }
   bool HasMetadata(int metadata);
@@ -163,6 +165,26 @@ class App : public Application, public MessageReceiverInterface {
     int,          // Nonce
     int          // HopNonce
   > retransmit_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    int,          // Nonce
+    int,          // HopNonce
+    int,          // k
+    int,          // m
+    int,          // idx
+    uint32_t     // MessageSize
+  > send_ec_data_callback_;
+
+  TracedCallback<
+    Ptr<App>,     // AppPointer
+    int,          // Nonce
+    int,          // HopNonce
+    int,          // k
+    int,          // m
+    int,          // idx
+    uint32_t     // MessageSize
+  > receive_ec_data_callback_;
 };
 
 } // namespace pec

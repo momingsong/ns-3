@@ -66,6 +66,12 @@ void PecTracer::TraceApps(ApplicationContainer apps) {
     app->TraceConnectWithoutContext(
       "Retransmit", 
       MakeCallback(&PecTracer::Retransmit, this));
+    app->TraceConnectWithoutContext(
+      "SendECData", 
+      MakeCallback(&PecTracer::SendECData, this));
+    app->TraceConnectWithoutContext(
+      "ReceiveECData", 
+      MakeCallback(&PecTracer::ReceiveECData, this));
   }
 }
 
@@ -304,6 +310,27 @@ void PecTracer::Retransmit(Ptr<App> app, int nonce, int hop_nonce) {
   std::ofstream output;
   output.open(std::string(prefix_ + "_T.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"T: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<std::endl;
+}
+
+void PecTracer::SendECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+  NS_LOG_UNCOND("SED: " << app->GetNode()->GetId() << " "
+                        << nonce << " "
+                        << hop_nonce << " "
+                        << k << " "
+                        << m << " "
+                        << idx << " "
+                        << len);
+}
+
+
+void PecTracer::ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+  NS_LOG_UNCOND("RED: " << app->GetNode()->GetId() << " "
+                        << nonce << " "
+                        << hop_nonce << " "
+                        << k << " "
+                        << m << " "
+                        << idx << " "
+                        << len);
 }
 
 } // namespace pec

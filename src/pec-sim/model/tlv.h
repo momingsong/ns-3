@@ -16,16 +16,12 @@ enum TlvType {
   kTlvInterest = 1,
   kTlvData = 2,
   kTlvAck = 3,
+	kTlvECData = 4,
 };
-
-const uint32_t kTlvTypeSize = sizeof(TlvType);
-const uint32_t kTlvLengthSize = sizeof(TlvLength);
-const uint32_t kTlvTypeLengthSize = kTlvTypeSize + kTlvLengthSize;
-
 
 inline TlvType PeekType(const uint8_t *buffer, const uint32_t buffer_size) {
   TlvType type = kUndefined;
-  std::copy(buffer, buffer + kTlvTypeSize, (uint8_t *)&type);
+  std::copy(buffer, buffer + sizeof(TlvType), (uint8_t *)&type);
   return type;
 }
 

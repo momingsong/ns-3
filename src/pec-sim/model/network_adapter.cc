@@ -17,6 +17,7 @@ const InetSocketAddress kPecUdpAddress = InetSocketAddress(
 bool NetworkAdapter::enable_retransmit_ = true;
 double NetworkAdapter::timeout_ = 0.5;
 int NetworkAdapter::retry_ = 3;
+bool NetworkAdapter::enable_erasure_code_ = true;
 
 NetworkAdapter::NetworkAdapter(Application &context,
                                MessageReceiverInterface &receiver)
@@ -60,10 +61,18 @@ void NetworkAdapter::SendInterest(::pec::Interest interest, double max_backoff) 
 void NetworkAdapter::SendData(::pec::Data data, double max_backoff) {
   waiting_ack_.insert(std::pair<int, std::set<uint32_t> >(data.hop_nonce(), data.receivers()));
   if (max_backoff <= 0.0) {
-    Send(data, true, 0);
+    if (enable_erasure_code_) {
+      ECSend(data, true, 0);
+    } else {
+      Send(data, true, 0);
+    }
   } else {
     double backoff = (rand() % 10000) / 10000.0 * max_backoff;
-    Simulator::Schedule(Seconds(backoff), &NetworkAdapter::Send, this, data, true, 0);
+    if (enable_erasure_code_) {
+      Simulator::Schedule(Seconds(backoff), &NetworkAdapter::ECSend, this, data, true, 0);
+    } else {
+      Simulator::Schedule(Seconds(backoff), &NetworkAdapter::Send, this, data, true, 0);
+    }
   }
 }
 
@@ -86,6 +95,30 @@ void NetworkAdapter::Send(::pec::Block &message, bool retransmit, int retry) {
   delete [] buf;
 }
 
+void NetworkAdapter::ECSend(::pec::Data &data, bool retransmit, int retry) {
+  std::vector< ::pec::ECData> ec_data = ::pec::ECData::EncodeData(data);
+  for (unsigned int i = 0; i < ec_data.size(); ++i) {
+    // tracing
+    receiver_.SendECDataCallback(
+      ec_data[i].nonce(),
+      ec_data[i].hop_nonce(),
+      ec_data[i].k(),
+      ec_data[i].m(),
+      ec_data[i].idx(),
+      ec_data[i].GetWireLength()
+    );
+    uint32_t len = ec_data[i].GetWireLength();
+    uint8_t *buf = new uint8_t[len];
+    ec_data[i].GetWire(buf, len);
+    Ptr<Packet> packet = Create<Packet>(buf, len);
+    send_socket_->Send(packet);
+    delete [] buf;
+  }
+  if (enable_retransmit_ && retransmit) {
+    Simulator::Schedule(Seconds(timeout_), &NetworkAdapter::ECRetransmit, this, data, retry + 1);
+  }
+}
+
 void NetworkAdapter::Retransmit(::pec::Data &message, int retry) {
   if (retry >= retry_)
     return;
@@ -95,6 +128,18 @@ void NetworkAdapter::Retransmit(::pec::Data &message, int retry) {
     Send(message, true, retry);
   } else {
     waiting_ack_.erase(message.hop_nonce());
+  }
+}
+
+void NetworkAdapter::ECRetransmit(::pec::Data &data, int retry) {
+  if (retry >= retry_)
+    return;
+  if (!waiting_ack_.find(data.hop_nonce())->second.empty()) {
+    data.set_receivers(waiting_ack_.find(data.hop_nonce())->second);
+    receiver_.RetransmitCallback(data.nonce(), data.hop_nonce());
+    ECSend(data, true, retry);
+  } else {
+    waiting_ack_.erase(data.hop_nonce());
   }
 }
 
@@ -119,6 +164,10 @@ void NetworkAdapter::Receive(Ptr<Socket> socket) {
       ::pec::Ack ack;
       ack.DecodeFromBuffer(buf, len);
       ReceiveAck(ack);
+    } else if (type == ::pec::kTlvECData) {
+      ::pec::ECData ec_data;
+      ec_data.DecodeFromBuffer(buf, len);
+      ReceiveECData(ec_data, from_ip);
     }
     delete [] buf;
   }
@@ -128,6 +177,45 @@ void NetworkAdapter::ReceiveAck(::pec::Ack ack) {
   receiver_.ReceiveAckCallback(ack.nonce(), ack.hop_nonce(), ack.from());
   if (waiting_ack_.find(ack.hop_nonce()) != waiting_ack_.end()) {
     waiting_ack_.find(ack.hop_nonce())->second.erase(ack.from());
+  }
+}
+
+void NetworkAdapter::ReceiveECData(::pec::ECData ec_data, Ipv4Address from_ip) {
+  // tracing
+  receiver_.ReceiveECDataCallback(
+    ec_data.nonce(),
+    ec_data.hop_nonce(),
+    ec_data.k(),
+    ec_data.m(),
+    ec_data.idx(),
+    ec_data.GetWireLength()
+  );
+  int hop_nonce = ec_data.hop_nonce();
+  if (ec_received_.find(hop_nonce) == ec_received_.end()) {
+    std::vector< ::pec::ECData> received;
+    ec_received_.insert(std::pair<int, std::vector< ::pec::ECData> >(hop_nonce, received));
+    ec_decoded_.insert(std::pair<int, bool>(hop_nonce, false));
+  }
+
+  if (ec_decoded_.find(hop_nonce)->second) {
+    return;
+  }
+
+  std::vector< ::pec::ECData> &received = ec_received_.find(hop_nonce)->second;
+  std::vector< ::pec::ECData>::iterator iter = received.begin();
+  while (iter != received.end()) {
+    if (ec_data.idx() == iter->idx()) {
+      return;
+    }
+    ++iter;
+  }
+
+  received.push_back(ec_data);
+
+  if (received.size() >= (unsigned int)ec_data.k()) {
+    ::pec::Data data = ::pec::ECData::DecodeData(received);
+    receiver_.ReceiveData(data, from_ip);
+    ec_decoded_.find(hop_nonce)->second = true;
   }
 }
 
