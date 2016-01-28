@@ -136,7 +136,7 @@ void NetworkAdapter::ECRetransmit(::pec::Data &data, int retry) {
     return;
   if (!waiting_ack_.find(data.hop_nonce())->second.empty()) {
     data.set_receivers(waiting_ack_.find(data.hop_nonce())->second);
-    receiver_.RetransmitCallback(data.nonce(), data.hop_nonce());
+    receiver_.RetransmitCallback(data.nonce(), data.hop_nonce(), data.GetWireLength());
     ECSend(data, true, retry);
   } else {
     waiting_ack_.erase(data.hop_nonce());
