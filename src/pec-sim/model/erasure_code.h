@@ -27,6 +27,8 @@ class ErasureCode {
 
  	static int block_size_;
  	static double redundancy_rate_;
+
+ 	static const int MAX_FRAGMENTS = 32;
 };
 
 } // namespace pec

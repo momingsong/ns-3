@@ -10,6 +10,10 @@ double ErasureCode::redundancy_rate_;
 void ErasureCode::ComputeBlockNum(uint32_t data_length, int &k, int &m) {
 	k = data_length / block_size_ + 1;
 	m = (k - 1) * redundancy_rate_ + 1;
+	if (k + m > MAX_FRAGMENTS) {
+		k = MAX_FRAGMENTS / (1 + redundancy_rate_);
+		m = MAX_FRAGMENTS - k;
+	}
 }
 
 void ErasureCode::Encode(const int k, const int m, const uint8_t *data, 
