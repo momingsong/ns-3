@@ -340,6 +340,9 @@ void PecTracer::SendECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m,
                         << m << " "
                         << idx << " "
                         << len);
+std::ofstream output;
+  output.open(std::string(prefix_ + "_SED.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"SED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" k "<<k<<" m "<<m<<" Block "<<len<<std::endl;
 }
 
 
@@ -351,6 +354,11 @@ void PecTracer::ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int k, int
                         << m << " "
                         << idx << " "
                         << len);
+                        
+std::ofstream output;
+  output.open(std::string(prefix_ + "_RED.data").c_str(),std::fstream::out | std::fstream::app);
+output<<"RED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" k "<<k<<" m "<<m<<" Block "<<len<<std::endl;
+
 }
 
 } // namespace pec
