@@ -3,12 +3,13 @@
 .lock-waf_cygwin_build
 *.exe
 *.stackdump
+*.txt
 .waf*
 build/
 *.pyc
 *.patch
-*.sh
-*.gp
+./*.sh
+./*.gp
 *.data
 *.png
 *~
