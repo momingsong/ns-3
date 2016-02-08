@@ -19,6 +19,10 @@ class Data : public Block {
     metadata_ = data.metadata_;
   }
 
+  static void ConfigMetadata(int metadata_entry_size) { 
+    metadata_entry_size_ = metadata_entry_size;
+  }
+
   static std::vector<Data> WrapMetadata(std::set<int> metadata, int num);
 
   void set_metadata(std::set<int> metadata) { Reset(); metadata_ = metadata; }
@@ -31,8 +35,11 @@ class Data : public Block {
   void Encode();
   void Decode();
 
+  static int metadata_entry_size_;
+
   std::set<uint32_t> receivers_;
   std::set<int> metadata_;
+
 };
 
 } // namespace pec

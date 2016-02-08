@@ -196,11 +196,9 @@ void NetworkAdapter::ReceiveECData(::pec::ECData ec_data, Ipv4Address from_ip) {
     ec_received_.insert(std::pair<int, std::vector< ::pec::ECData> >(hop_nonce, received));
     ec_decoded_.insert(std::pair<int, bool>(hop_nonce, false));
   }
-
   if (ec_decoded_.find(hop_nonce)->second) {
     return;
   }
-
   std::vector< ::pec::ECData> &received = ec_received_.find(hop_nonce)->second;
   std::vector< ::pec::ECData>::iterator iter = received.begin();
   while (iter != received.end()) {
@@ -209,9 +207,7 @@ void NetworkAdapter::ReceiveECData(::pec::ECData ec_data, Ipv4Address from_ip) {
     }
     ++iter;
   }
-
   received.push_back(ec_data);
-
   if (received.size() >= (unsigned int)ec_data.k()) {
     ::pec::Data data = ::pec::ECData::DecodeData(received);
     receiver_.ReceiveData(data, from_ip);

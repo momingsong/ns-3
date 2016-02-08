@@ -4,9 +4,9 @@
 
 namespace pec {
 
-Data::Data() { nonce_ = rand(); }
+int Data::metadata_entry_size_ = 30;
 
-// Data::Data(std::string message) : message_(message) { nonce_ = rand(); }
+Data::Data() { nonce_ = rand(); }
 
 Data::Data(std::set<int> metadata) {
   metadata_ = metadata;
@@ -41,7 +41,8 @@ std::vector<Data> Data::WrapMetadata(std::set<int> metadata, int max) {
 void Data::Encode() {
   Reset();
 
-  wire_length_ = sizeof(TlvType) + sizeof(int) * (3 + metadata_.size()) 
+  wire_length_ = sizeof(TlvType) + sizeof(int) * 3
+                + metadata_entry_size_ * metadata_.size() 
                 + sizeof(uint32_t) * (receivers_.size() + 1);
   wire_begin_ = new uint8_t[wire_length_];
 
@@ -65,7 +66,12 @@ void Data::Encode() {
   std::set<int>::iterator m_iter = metadata_.begin();
   while (m_iter != metadata_.end()) {
     *((int *)p) = *m_iter;
-    p += sizeof(int);
+    uint8_t *q = p + sizeof(int);
+    while (q != p + metadata_entry_size_) {
+      *q = 0;
+      ++q;
+    }
+    p += metadata_entry_size_;
     ++m_iter;
   }
 }
@@ -88,7 +94,7 @@ void Data::Decode() {
   metadata_.clear();
   while (p != wire_begin_ + wire_length_) {
     metadata_.insert(*((int *)p));
-    p += sizeof(int);
+    p += metadata_entry_size_;
   }
 }
 

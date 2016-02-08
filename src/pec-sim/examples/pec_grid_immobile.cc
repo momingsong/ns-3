@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   
   int consumer_index = 44;
 
+  int metadata_entry_size = 30;
   int data_amount = 10000;
   int redundancy = 1;
 
@@ -72,6 +73,7 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("gridInterval", "Distance between adjacent nodes in the grid",
                 grid_interval);
   cmd.AddValue("consumerIdx", "Index of the consumer node", consumer_index);
+  cmd.AddValue("metadataEntrySize", "Size of each metadata entry in bytes", metadata_entry_size);
   cmd.AddValue("dataAmount",
                "How many different pieces of data exist in the network",
                data_amount);
@@ -144,6 +146,7 @@ int main(int argc, char *argv[]) {
          << "# gridWidth=" << grid_width << std::endl
          << "# gridInterval=" << grid_interval << std::endl
          << "# consumerIdx=" << consumer_index << std::endl
+         << "# metadataEntrySize=" << metadata_entry_size << std::endl
          << "# dataAmount=" << data_amount << std::endl
          << "# redundancy=" << redundancy << std::endl
          << "# enableRedundancyDetection=" << enable_redundancy_detection << std::endl
@@ -264,6 +267,7 @@ int main(int argc, char *argv[]) {
   Config::SetDefault("ns3::pec::App::MRWindowSize",
                      IntegerValue(mr_window_size));
   ::pec::Interest::ConfigBloomFilter(bf_size_max, bf_size_min, bf_fpp);
+  ::pec::Data::ConfigMetadata(metadata_entry_size);
   ::ns3::pec::NetworkAdapter::ConfigRetransmit(enable_retransmit, rt_timeout, rt_retry);
   ::ns3::pec::NetworkAdapter::ConfigErasureCoding(enable_erasure_code, ec_block_size, ec_redundancy);
 
