@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   int node_num = 100;
   int grid_width = 10;
-  double grid_interval = 30;
+  double grid_interval = 100.0;
   
   int consumer_index = 44;
 
@@ -180,26 +180,43 @@ int main(int argc, char *argv[]) {
   //
   // Wifi Phy
   //
-  
-  YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
-  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
-  wifiPhy.SetChannel(wifiChannel.Create());
-  
-  wifiPhy.Set("ShortGuardEnabled", BooleanValue(true));
 
-  WifiHelper wifi = WifiHelper::Default();
-  wifi.SetStandard(WIFI_PHY_STANDARD_80211ac);
-  VhtWifiMacHelper wifiMac = VhtWifiMacHelper::Default();
-   
-  StringValue dataRate= VhtWifiMacHelper::DataRateForMcs(9);
+  // disable fragmentation for frames below 2200 bytes
+  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold",
+                      StringValue ("2200"));
+  // turn off RTS/CTS for frames below 2200 bytes
+  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold",
+                      StringValue ("2200"));
+  // Fix non-unicast data rate to be the same as that of unicast
+  Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
+                      StringValue ("DsssRate1Mbps"));
+
+  // The below set of helpers will help us to put together the wifi NICs we want
+  WifiHelper wifi;
+  wifi.SetStandard(WIFI_PHY_STANDARD_80211b);
+
+  YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
+  // This is one parameter that matters when using FixedRssLossModel
+  // set it to zero; otherwise, gain will be added
+  wifiPhy.Set("RxGain", DoubleValue(0));
+  // ns-3 supports RadioTap and Prism tracing extensions for 802.11b
+  wifiPhy.SetPcapDataLinkType(YansWifiPhyHelper::DLT_IEEE802_11_RADIO);
+
+  YansWifiChannelHelper wifiChannel;
+  wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+  // The below FixedRssLossModel will cause the rss to be fixed regardless
+  // of the distance between the two stations, and the transmit power
+  wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
+  wifiPhy.SetChannel(wifiChannel.Create());
+
+  // Add a non-QoS upper mac, and disable rate control
+  NqosWifiMacHelper wifiMac = NqosWifiMacHelper::Default();
   wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
-                               "DataMode", dataRate,
-                               "ControlMode", dataRate);
-  
+                               "DataMode", StringValue("DsssRate1Mbps"),
+                               "ControlMode", StringValue("DsssRate1Mbps"));
+  // Set it to adhoc mode
   wifiMac.SetType("ns3::AdhocWifiMac");
   NetDeviceContainer devices = wifi.Install(wifiPhy, wifiMac, nodes);
-  
-  Config::Set("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/ChannelWidth", UintegerValue(160));
 
   //
   // IP
@@ -211,7 +228,7 @@ int main(int argc, char *argv[]) {
   Ipv4AddressHelper ipv4;
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
   Ipv4InterfaceContainer ip_container = ipv4.Assign (devices);
-  
+
   //
   // Mobility
   //
