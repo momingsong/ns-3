@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
   int node_num = 100;
   int grid_width = 10;
-  double grid_interval = 35;
+  double grid_interval = 30;
   
   int consumer_index = 44;
 
