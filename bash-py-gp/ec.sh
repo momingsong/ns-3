@@ -9,7 +9,7 @@ for k in ${eck[@]}
     do
     	for mpm in ${ecmpm[@]}
     	do
-      ./waf --run "pec_grid_immobile  --dataAmount=10000 --redundancy=1 --tracePath=ec_k${k}_m${m}_mpm${mpm} --enableRedundancyDetection=false --enableMultiRound=false --enableCollisionAvoidance=true --maxMetadataPerMessage=${mpm} --maxBackoff=0  --enableRetransmit=false --enableErasureCoding=true --erasureCodingK=${k} --erasureCodingM=${m}"
+      ./waf --run "pec_grid_immobile  --dataAmount=10000 --redundancy=1 --tracePath=ec_k${k}_m${m}_mpm${mpm} --enableRedundancyDetection=false --enableMultiRound=false --enableCollisionAvoidance=true --maxMetadataPerMessage=${mpm} --maxBackoff=0  --enableRetransmit=true -retransmitRetry=5 --retransmitTimeout=0.5 --enableErasureCoding=true --erasureCodingK=${k} --erasureCodingM=${m}"
   done
   done
 done
