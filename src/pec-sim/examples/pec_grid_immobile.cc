@@ -59,8 +59,8 @@ int main(int argc, char *argv[]) {
   int rt_retry = 3;
 
   bool enable_erasure_code = true;
-  int ec_block_size = 1000;
-  double ec_redundancy = 0.2;
+  int ec_k = 10;
+  int ec_m = 2;
 
   bool enable_consumer_log = true;
 
@@ -127,12 +127,12 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("enableErasureCoding",
                "Enable erasure coding.",
                 enable_erasure_code);
-  cmd.AddValue("erasureCodingBlockSize",
-               "Erasure Coding: size of each block.",
-               ec_block_size);
-  cmd.AddValue("erasureCodingRedundancyRate",
-               "Erasure Coding: ratio of redundant blocks over data blocks.",
-               ec_redundancy);
+  cmd.AddValue("erasureCodingK",
+               "Erasure Coding: K.",
+               ec_k);
+  cmd.AddValue("erasureCodingM",
+               "Erasure Coding: M.",
+               ec_m);
   cmd.AddValue("enableConsumerLog",
                 "Enable the detailed log for the consumer received package",
                 enable_consumer_log);
@@ -165,8 +165,8 @@ int main(int argc, char *argv[]) {
          << "# retransmitTimeout=" << rt_timeout << std::endl
          << "# retransmitRetry=" << rt_retry << std::endl
          << "# enableErasureCoding=" << enable_erasure_code << std::endl
-         << "# erasureCodingBlockSize=" << ec_block_size << std::endl
-         << "# erasureCodingRedundancyRate=" << ec_redundancy << std::endl;
+         << "# erasureCodingK=" << ec_k << std::endl
+         << "# erasureCodingM=" << ec_m << std::endl;
   std::string parameters = stream.str();
   std::cout << parameters;
 
@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
   ::pec::Interest::ConfigBloomFilter(bf_size_max, bf_size_min, bf_fpp);
   ::pec::Data::ConfigMetadata(metadata_entry_size);
   ::ns3::pec::NetworkAdapter::ConfigRetransmit(enable_retransmit, rt_timeout, rt_retry);
-  ::ns3::pec::NetworkAdapter::ConfigErasureCoding(enable_erasure_code, ec_block_size, ec_redundancy);
+  ::ns3::pec::NetworkAdapter::ConfigErasureCoding(enable_erasure_code, ec_k, ec_m);
 
   ns3::pec::AppHelper helper;
   helper.set_data_amount(data_amount);

@@ -30,8 +30,8 @@ class App : public Application, public MessageReceiverInterface {
   virtual void SendAckCallback(int nonce, int hop_nonce, uint32_t from, uint32_t size);
   virtual void ReceiveAckCallback(int nonce, int hop_nonce, uint32_t from);
   virtual void RetransmitCallback(int nonce, int hop_nonce, uint32_t size);
-  virtual void SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
-  virtual void ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len);
+  virtual void SendECDataCallback(int nonce, int hop_nonce, int idx, uint32_t len);
+  virtual void ReceiveECDataCallback(int nonce, int hop_nonce, int idx, uint32_t len);
 
   void AddMetadata(int metadata) { local_metadata_.insert(metadata); }
   bool HasMetadata(int metadata);
@@ -172,8 +172,6 @@ class App : public Application, public MessageReceiverInterface {
     Ptr<App>,     // AppPointer
     int,          // Nonce
     int,          // HopNonce
-    int,          // k
-    int,          // m
     int,          // idx
     uint32_t     // MessageSize
   > send_ec_data_callback_;
@@ -182,8 +180,6 @@ class App : public Application, public MessageReceiverInterface {
     Ptr<App>,     // AppPointer
     int,          // Nonce
     int,          // HopNonce
-    int,          // k
-    int,          // m
     int,          // idx
     uint32_t     // MessageSize
   > receive_ec_data_callback_;

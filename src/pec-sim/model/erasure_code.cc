@@ -4,35 +4,26 @@
 
 namespace pec {
 
-int ErasureCode::block_size_;
-double ErasureCode::redundancy_rate_;
+int ErasureCode::k_;
+int ErasureCode::m_;
 
-void ErasureCode::ComputeBlockNum(uint32_t data_length, int &k, int &m) {
-	k = data_length / block_size_ + 1;
-	m = (k - 1) * redundancy_rate_ + 1;
-	if (k + m > MAX_FRAGMENTS) {
-		k = MAX_FRAGMENTS / (1 + redundancy_rate_);
-		m = MAX_FRAGMENTS - k;
-	}
-}
-
-void ErasureCode::Encode(const int k, const int m, const uint8_t *data, 
- 		const uint32_t data_length, std::vector<std::vector<uint8_t> > &blocks) {
-	int desc = CreateInstance(k, m);
+void ErasureCode::Encode(const uint8_t *data, const uint32_t data_length,
+	std::vector<std::vector<uint8_t> > &blocks) {
+	int desc = CreateInstance();
 	char **encoded_data;
 	char **encoded_parity;
 	uint64_t fragment_length;
 	liberasurecode_encode(desc, (char *)data, (uint64_t)data_length, &encoded_data, 
 		&encoded_parity, &fragment_length);
 	blocks.clear();
-	for (int i = 0; i < k; ++i) {
+	for (int i = 0; i < k_; ++i) {
 		std::vector<uint8_t> v;
 		for (unsigned int j = 0; j < fragment_length; ++j) {
 			v.push_back((uint8_t)encoded_data[i][j]);
 		}
 		blocks.push_back(v);
 	}
-	for (int i = 0; i < m; ++i) {
+	for (int i = 0; i < m_; ++i) {
 		std::vector<uint8_t> v;
 		for (unsigned int j = 0; j < fragment_length; ++j) {
 			v.push_back((uint8_t)encoded_parity[i][j]);
@@ -43,10 +34,9 @@ void ErasureCode::Encode(const int k, const int m, const uint8_t *data,
 	liberasurecode_instance_destroy(desc);
 }
 
-void ErasureCode::Decode(const int k, const int m, 
-	const std::vector<std::vector<uint8_t> > &blocks, uint8_t **data,
-	uint32_t &data_length) {
-  int desc = CreateInstance(k, m);
+void ErasureCode::Decode(const std::vector<std::vector<uint8_t> > &blocks,
+	uint8_t **data, uint32_t &data_length) {
+  int desc = CreateInstance();
   char **available_fragments = new char *[blocks.size()];
   for (unsigned int i = 0; i < blocks.size(); ++i) {
   	available_fragments[i] = new char [blocks[i].size()];
@@ -70,11 +60,11 @@ void ErasureCode::Decode(const int k, const int m,
   delete [] available_fragments;
 }
 
-int ErasureCode::CreateInstance(int k, int m) {
+int ErasureCode::CreateInstance() {
 	ec_args args;
-	args.k = k;
-	args.m = m;
-	args.hd = m + 1;
+	args.k = k_;
+	args.m = m_;
+	args.hd = m_ + 1;
 	args.w = 8;
 	args.ct = CHKSUM_NONE;
 	return liberasurecode_instance_create(EC_BACKEND_JERASURE_RS_VAND, &args);

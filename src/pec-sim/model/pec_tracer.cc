@@ -332,32 +332,28 @@ void PecTracer::Retransmit(Ptr<App> app, int nonce, int hop_nonce, uint32_t size
   ++data_num_;
 }
 
-void PecTracer::SendECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+void PecTracer::SendECData(Ptr<App> app, int nonce, int hop_nonce, int idx, uint32_t len) {
   NS_LOG_UNCOND("SED: " << app->GetNode()->GetId() << " "
                         << nonce << " "
                         << hop_nonce << " "
-                        << k << " "
-                        << m << " "
                         << idx << " "
                         << len);
 std::ofstream output;
   output.open(std::string(prefix_ + "_SED.data").c_str(),std::fstream::out | std::fstream::app);
-output<<"SED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" k "<<k<<" m "<<m<<" Block "<<len<<std::endl;
+output<<"SED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Block "<<len<<std::endl;
 }
 
 
-void PecTracer::ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
+void PecTracer::ReceiveECData(Ptr<App> app, int nonce, int hop_nonce, int idx, uint32_t len) {
   NS_LOG_UNCOND("RED: " << app->GetNode()->GetId() << " "
                         << nonce << " "
                         << hop_nonce << " "
-                        << k << " "
-                        << m << " "
                         << idx << " "
                         << len);
                         
 std::ofstream output;
   output.open(std::string(prefix_ + "_RED.data").c_str(),std::fstream::out | std::fstream::app);
-output<<"RED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" k "<<k<<" m "<<m<<" Block "<<len<<std::endl;
+output<<"RED: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Block "<<len<<std::endl;
 
 }
 

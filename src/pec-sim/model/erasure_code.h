@@ -9,24 +9,24 @@ namespace pec {
 
 class ErasureCode {
  public:
- 	static void ConfigErasureCode(int block_size, double redundancy_rate) {
- 		block_size_ = block_size;
- 		redundancy_rate_ = redundancy_rate;
+ 	static void ConfigErasureCode(int k, int m) {
+ 		k_ = k;
+ 		m_ = m;
  	}
+ 	
+ 	static void Encode(const uint8_t *data, const uint32_t data_length, 
+ 		std::vector<std::vector<uint8_t> > &blocks);
+ 	static void Decode(const std::vector<std::vector<uint8_t> > &blocks, 
+ 		uint8_t **data, uint32_t &data_length);
 
- 	static void ComputeBlockNum(uint32_t data_length, int &k, int &m);
-
- 	static void Encode(const int k, const int m, const uint8_t *data, 
- 		const uint32_t data_length, std::vector<std::vector<uint8_t> > &blocks);
- 	static void Decode(const int k, const int m, 
- 		const std::vector<std::vector<uint8_t> > &blocks, uint8_t **data, 
- 		uint32_t &data_length);
+ 	static int k() { return k_; }
+ 	static int m() { return m_; }
 
  private:
- 	static int CreateInstance(int k, int m);
+ 	static int CreateInstance();
 
- 	static int block_size_;
- 	static double redundancy_rate_;
+ 	static int k_;
+ 	static int m_;
 
  	static const int MAX_FRAGMENTS = 32;
 };

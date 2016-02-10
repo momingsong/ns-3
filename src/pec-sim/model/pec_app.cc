@@ -265,12 +265,12 @@ void App::RetransmitCallback(int nonce, int hop_nonce, uint32_t size) {
   retransmit_callback_(this, nonce, hop_nonce, size);
 }
 
-void App::SendECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
-  send_ec_data_callback_(this, nonce, hop_nonce, k, m, idx, len);
+void App::SendECDataCallback(int nonce, int hop_nonce, int idx, uint32_t len) {
+  send_ec_data_callback_(this, nonce, hop_nonce, idx, len);
 }
 
-void App::ReceiveECDataCallback(int nonce, int hop_nonce, int k, int m, int idx, uint32_t len) {
-  receive_ec_data_callback_(this, nonce, hop_nonce, k, m, idx, len);
+void App::ReceiveECDataCallback(int nonce, int hop_nonce, int idx, uint32_t len) {
+  receive_ec_data_callback_(this, nonce, hop_nonce, idx, len);
 }
 
 void App::DataDiscovery() {

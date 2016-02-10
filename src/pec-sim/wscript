@@ -46,7 +46,8 @@ def build(bld):
         'model/bloom_filter.h',
         'model/ack.h',
         'model/erasure_code.h',
-        'model/ec_data.h'
+        'model/ec_data.h',
+        'model/ec_ack.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

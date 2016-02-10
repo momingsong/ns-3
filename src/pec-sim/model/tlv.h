@@ -16,7 +16,8 @@ enum TlvType {
   kTlvInterest = 1,
   kTlvData = 2,
   kTlvAck = 3,
-	kTlvECData = 4,
+  kTlvECData = 4,
+  kTlvECAck = 5,
 };
 
 inline TlvType PeekType(const uint8_t *buffer, const uint32_t buffer_size) {

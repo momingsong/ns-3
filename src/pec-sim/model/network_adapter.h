@@ -6,6 +6,7 @@
 
 #include "ns3/application.h"
 #include "ns3/socket.h"
+#include "ns3/ipv4.h"
 
 #include "interest.h"
 #include "data.h"
@@ -13,6 +14,7 @@
 #include "message_receiver_interface.h"
 #include "ec_data.h"
 #include "erasure_code.h"
+#include "ec_ack.h"
 
 namespace ns3 {
 namespace pec {
@@ -29,9 +31,9 @@ class NetworkAdapter {
     retry_ = retry;
   }
 
-  static void ConfigErasureCoding(bool enable_erasure_code, int block_size, double redundancy) {
+  static void ConfigErasureCoding(bool enable_erasure_code, int k, int m) {
     enable_erasure_code_ = enable_erasure_code;
-    ::pec::ErasureCode::ConfigErasureCode(block_size, redundancy);
+    ::pec::ErasureCode::ConfigErasureCode(k, m);
   }
 
   void Init();
@@ -47,6 +49,7 @@ class NetworkAdapter {
   void Receive(Ptr<Socket> socket);
   void ReceiveAck(::pec::Ack ack);
   void ReceiveECData(::pec::ECData ec_data, Ipv4Address from_ip);
+  void ReceiveECAck(::pec::ECAck ec_ack);
 
   static bool enable_retransmit_;
   static double timeout_;
@@ -60,6 +63,7 @@ class NetworkAdapter {
   Ptr<Socket> receive_socket_;
 
   std::map<int, std::set<uint32_t> > waiting_ack_; // hop_nonce -> receivers
+  std::map<int, std::map<uint32_t, std::vector<bool> > > waiting_ec_ack_; // hop_nonce -> receivers -> blocks
 
   std::map<int, bool> ec_decoded_;  // hop_nonce -> is_decoded
   std::map<int, std::vector< ::pec::ECData> > ec_received_;  // hop_nonce -> received_ec_data_list
