@@ -6,7 +6,7 @@ set ylabel "Recall"
 set xrange [0:60000]
 set yrange [0:1]
 
-set key center at 50000,0.22
+set key center at 50000,0.6
 
 plot "baseline-recall.data" using 1:2 title "Redundancy=1" with linespoints, \
 "" using 1:3 title "Redundancy=2" with linespoints, \
