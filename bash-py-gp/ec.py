@@ -140,10 +140,10 @@ def RecallAndLatency(typePrefix, directory):
        
         recallf.write("#M: 1,2,3\n")
         latencyf.write("#M: 1,2,3\n")
-        for m in [1,2,3]:
-            recallf.write(str(m)+" ")
-            latencyf.write(str(m)+" ")
-            for k in [2,4,6,8,10]:
+        for k in [2,4,6,8,10]:
+            recallf.write(str(k)+" ")
+            latencyf.write(str(k)+" ")
+            for m in [1,2,3]:
                 file = open("%(directory)s%(typePrefix)s_k%(k)s_m%(m)s_mpm%(mpm)s_0.data"%vars())
                 line = file.readlines()[-1].split()
                 recallf.write(str(float(line[1])/10000)+" ")
