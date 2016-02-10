@@ -137,13 +137,13 @@ def RecallAndLatency(typePrefix, directory):
     recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
     latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
    
-    recallf.write("#Redundancy: 0.1,0.2,0.3,0.4,0.5\n")
-    latencyf.write("#Redundancy: 0.1,0.2,0.3,0.4,0.5\n")
-    for redundacy in [0.1,0.2,0.3,0.4,0.5]:
-        recallf.write(str(redundacy)+" ")
-        latencyf.write(str(redundacy)+" ")
-        for block in [100,200,300,400,500,600,700,800,900,1000]:
-            file = open("%(directory)s%(typePrefix)s_b%(block)s_r%(redundacy)s_0.data"%vars())
+    recallf.write("#M: 1,2,3\n")
+    latencyf.write("#M: 1,2,3\n")
+    for m in [1,2,3]:
+        recallf.write(str(m)+" ")
+        latencyf.write(str(m)+" ")
+        for k in [2,4,6,8,10]:
+            file = open("%(directory)s%(typePrefix)s_k%(k)s_m%(m)s_mpm20_0.data"%vars())
             line = file.readlines()[-1].split()
             recallf.write(str(float(line[1])/50000)+" ")
             latencyf.write(line[0]+" ")
