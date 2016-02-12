@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
   int ec_m = 2;
 
   bool enable_consumer_log = true;
+  int seednum = 1;
 
 
   // Parse commandline parameters
@@ -136,6 +137,9 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("enableConsumerLog",
                 "Enable the detailed log for the consumer received package",
                 enable_consumer_log);
+  cmd.AddValue("seed",
+                "Set the seed of the random numnber",
+                seednum);
   cmd.Parse (argc, argv);
 
   // Log parameters
@@ -169,6 +173,11 @@ int main(int argc, char *argv[]) {
          << "# erasureCodingM=" << ec_m << std::endl;
   std::string parameters = stream.str();
   std::cout << parameters;
+
+  //
+  // Set random number
+  //
+  srand((size_t)seednum);
 
   //
   // Nodes
