@@ -1,20 +1,22 @@
 import os
 
-def RecallAndLatency(typePrefix,varys,keys,amount):
+def RecallAndLatency(typePrefix,varys,params):
     recallf = open("./%(typePrefix)s-recall.data"%vars(), "w")
     latencyf = open("./%(typePrefix)s-latency.data"%vars(), "w")
     recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
     latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
-    recallf.write("#%s %s\n"%(keys[1],varys[keys[1]]))
-    latencyf.write("#%s %s\n"%(keys[1],varys[keys[1]]))
+    recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+    latencyf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
     
-    for a in eval(varys[keys[0]]):
+    for a in eval(varys[0][1]):
+        params[varys[0][0]] = a
         recallf.write(str(a)+" ")
         latencyf.write(str(a)+" ")
-        for b in eval(varys[keys[1]]):
-            file = open("./%s_%s%s_%s%s_0.data"%(typePrefix,keys[0],str(a),keys[1],str(b)))
+        for b in eval(varys[1][1]):
+            params[varys[1][0]] = b
+            file = open("./%s_%s%s_%s%s_0.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b)))
             line = file.readlines()[-1].split()
-            recallf.write(str(float(line[1])/float(amount))+" ")
+            recallf.write(str(float(line[1])/float(params['daa']))+" ")
             latencyf.write(line[0]+" ")
             file.close()
         recallf.write("\n")
@@ -22,9 +24,9 @@ def RecallAndLatency(typePrefix,varys,keys,amount):
     recallf.close()
     latencyf.close()
 
-def RSRHeatmap(typePrefix, varys, keys):
-    for a in eval(varys[keys[0]]):
-        for b in eval(varys[keys[1]]):
+def RSRHeatmap(typePrefix, varys):
+    for a in eval(varys[0][1]):
+        for b in eval(varys[1][1]):
             sendList = []
             recvList = []
             ratiolist = []
@@ -33,7 +35,7 @@ def RSRHeatmap(typePrefix, varys, keys):
                 recvList.append([])
                 ratiolist.append(0)
             for logcontent in ['SI','SD']:
-                file = open("./%s_%s%s_%s%s_%s.data"%(typePrefix,keys[0],str(a),keys[1],str(b),logcontent))
+                file = open("./%s_%s%s_%s%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),logcontent))
                 for line in file:
                     if(line[0:2] == logcontent):
                         info = line.split(" ")
@@ -45,7 +47,7 @@ def RSRHeatmap(typePrefix, varys, keys):
                             sendList[int(info[1])].append(hopnonce)
                 file.close()
             for logcontent in ['RI','DRD']:
-                file = open("./%s_%s%s_%s%s_%s.data"%(typePrefix,keys[0],str(a),keys[1],str(b),logcontent))
+                file = open("./%s_%s%s_%s%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),logcontent))
                 for line in file:
                     if(line[0:2] == logcontent or line[0:3] == logcontent):
                         info = line.split(" ")
@@ -68,10 +70,13 @@ def RSRHeatmap(typePrefix, varys, keys):
                             continue
                         recv += recvList[i+ki].count(x)
                     ratiolist[i] += recv
-                    
-                ratiolist[i] /= float(len(sendList[i]))
-            writefile = open("./%s-heatmap-%s%s_%s%s.data"%(typePrefix,keys[0],str(a),keys[1],str(b)), "w")
-            writefile.write("#%s-heatmap-%s%s_%s%s.data\n"%(typePrefix,keys[0],str(a),keys[1],str(b)))
+                
+                if (len(sendList[i])==0):
+                    ratiolist[i] = 0
+                else:
+                    ratiolist[i] /= float(len(sendList[i]))
+            writefile = open("./%s-heatmap-%s%s_%s%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b)), "w")
+            writefile.write("#%s-heatmap-%s%s_%s%s.data\n"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b)))
             writefile.write("#Data for receive send ratio on each ndoe of the %(typePrefix)s\n"%vars())
             writefile.write("#10x10 grid. Each = R/S ratio for the node.\n")
             for i in xrange(10):
@@ -80,15 +85,13 @@ def RSRHeatmap(typePrefix, varys, keys):
                 writefile.write("\n")
             writefile.close()
 
-def process(base,varys,number,amount):
-    k=[]
-    for key in varys:
-        k.append(key)
+def process(varys,params,number):
+    base=params['t']
 
     current = os.path.dirname(__file__)
     aimdir = current + "/%d-%s"%(number,base)
     os.chdir(aimdir)
-    RecallAndLatency(base,varys,k,amount)
-    RSRHeatmap(base,varys,k)
+    RecallAndLatency(base,varys,params)
+    RSRHeatmap(base,varys)
     os.chdir(current)
     
