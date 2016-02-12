@@ -12,8 +12,8 @@ def execute(methods,varys,params,number):
 
 			exe = './waf --run "pec_grid_immobile --tracePath='+params['t']+'_'+varys[0][0]+str(a)+'_'+varys[1][0]+str(b)+' --dataAmount=%(daa)s --redundancy=%(rdd)s --enableRedundancyDetection=%(er)s --enableCollisionAvoidance=%(ec)s --maxMetadataPerMessage=%(mpm)s --maxBackoff=%(mbo)s --enableMultiRound=%(em)s --multiRoundRoundFinishThreshold=%(thr)s --multiRoundDiscoveryFinishThreshold=%(thd)s --multiRoundSlotSize=%(mss)s --multiRoundWindowSize=%(mws)s --enableRetransmit=%(ea)s --retransmitTimeout=%(rto)s --retransmitRetry=%(rty)s --enableErasureCoding=%(ee)s --erasureCodingK=%(eck)s --erasureCodingM=%(ecm)s --seed=%(sed)s"'%params
 			print exe
-			os.chdir("/home/sxt/workspace/pec/ns-3/")
-			#os.chdir("/home/ubuntu/pecns3/")
+			#os.chdir("/home/sxt/workspace/pec/ns-3/")
+			os.chdir("/home/ubuntu/pecns3/")
 			os.system(exe)
 			os.system("mv *.data %s"%aimdir)
 	os.chdir(current)
