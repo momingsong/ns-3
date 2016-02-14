@@ -2,24 +2,27 @@ import os
 import sys
 
 def RecallAndLatency(typePrefix,varys,params):
+
+    if(len(varys)==1):
+        print "recall and latency cannot be drawn"
+        return
     paramarray=[]
     #print len(varys)
-    for lv in xrange(0,len(varys)-2):
+    for lv in xrange(2,len(varys)):
         paramarray.append(0)
     #print paramarray
-    while len(paramarray)==0 or paramarray[0] < len(eval(varys[0][1])):
+    while len(paramarray)==0 or paramarray[0] < len(eval(varys[2][1])):
         paramlist=""
-        for lv in xrange(0,len(varys)-2):
+        for lv in xrange(2,len(varys)):
             kv=eval(varys[lv][1])
-            paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv]])))
-            params[varys[lv][0]]=kv[paramarray[lv]]
-
+            paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
+            params[varys[lv][0]]=kv[paramarray[lv-2]]
         if len(paramarray) > 0:
             paramarray[-1]+=1
-        for rv in xrange(len(varys)-3,0,-1):
-            if paramarray[rv]>=len(eval(varys[rv][1])):
-                paramarray[rv]=0
-                paramarray[rv-1]+=1
+        for rv in xrange(len(varys)-1,2,-1):
+            if paramarray[rv-2]>=len(eval(varys[rv][1])):
+                paramarray[rv-2]=0
+                paramarray[rv-3]+=1
 
         recallf = open("./%(typePrefix)s-recall%(paramlist)s.sum"%vars(), "w")
         latencyf = open("./%(typePrefix)s-latency%(paramlist)s.sum"%vars(), "w")
@@ -30,13 +33,13 @@ def RecallAndLatency(typePrefix,varys,params):
 
         
         
-        for a in eval(varys[-2][1]):
-            params[varys[-2][0]] = a
+        for a in eval(varys[0][1]):
+            params[varys[0][0]] = a
             recallf.write(str(a)+" ")
             latencyf.write(str(a)+" ")
-            for b in eval(varys[-1][1]):
-                params[varys[-1][0]] = b
-                file = open("./%s%s_%s%s_%s%s_0.data"%(typePrefix,paramlist,varys[-2][0],str(a),varys[-1][0],str(b)))
+            for b in eval(varys[1][1]):
+                params[varys[1][0]] = b
+                file = open("./%s_%s%s_%s%s%s_0.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist))
                 line = file.readlines()[-1].split()
                 recallf.write(str(float(line[1])/float(params['daa']))+" ")
                 latencyf.write(line[0]+" ")
@@ -47,7 +50,7 @@ def RecallAndLatency(typePrefix,varys,params):
         latencyf.close()
 
         if len(paramarray)==0:
-            paramarray.append(sys.maxint)
+            break
 
 def RSRHeatmap(typePrefix, varys):
     paramarray=[]

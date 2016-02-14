@@ -2,31 +2,34 @@ import os
 import sys
 
 def plotSumCurve(base,varys,title):
-	paramarray=[]
-	for lv in xrange(0,len(varys)-2):
-		paramarray.append(0)
-	while len(paramarray)==0 or paramarray[0] < len(eval(varys[0][1])):
-		paramlist=""
-		for lv in xrange(0,len(varys)-2):
-			kv=eval(varys[lv][1])
-			paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv]])))
+	if(len(varys)==1):
+		print "sum curve cannot be drawn"
+		return
 
+	paramarray=[]
+	for lv in xrange(2,len(varys)):
+		paramarray.append(0)
+	while len(paramarray)==0 or paramarray[0] < len(eval(varys[2][1])):
+		paramlist=""
+		for lv in xrange(2,len(varys)):
+			kv=eval(varys[lv][1])
+			paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
 		if len(paramarray) > 0:
 			paramarray[-1]+=1
-		for rv in xrange(len(varys)-3,0,-1):
-			if paramarray[rv]>=len(eval(varys[rv][1])):
-				paramarray[rv]=0
-				paramarray[rv-1]+=1
+		for rv in xrange(len(varys)-1,2,-1):
+			if paramarray[rv-2]>=len(eval(varys[rv][1])):
+				paramarray[rv-2]=0
+				paramarray[rv-3]+=1
 
 
 
 		recalls = "set terminal png\nset output \"%s-%s%s.png\"\nset xlabel \"%s\"\nset ylabel \"%s\"\
-		\nplot \"%s-%s%s.sum\" "%(base,title,paramlist,varys[-2][0],title,base,title,paramlist)
+		\nplot \"%s-%s%s.sum\" "%(base,title,paramlist,varys[0][0],title,base,title,paramlist)
 
-		b=eval(varys[-1][1])
-		recalls += "using 1:2 title \"%s=%s\" with linespoints, "%(varys[-1][0],str(b[0]))
+		b=eval(varys[1][1])
+		recalls += "using 1:2 title \"%s=%s\" with linespoints, "%(varys[1][0],str(b[0]))
 		for a in xrange(1,len(b)):
-			recalls += "\"\" using 1:%d title \"%s=%s\" with linespoints, "%(a+2,varys[-1][0],str(b[a]))
+			recalls += "\"\" using 1:%d title \"%s=%s\" with linespoints, "%(a+2,varys[1][0],str(b[a]))
 
 		recallf=open("./%s.gp"%(title),'w')
 		recallf.write(recalls)
@@ -34,7 +37,7 @@ def plotSumCurve(base,varys,title):
 
 		os.system("gnuplot %s.gp"%(title))
 		if len(paramarray)==0:
-			paramarray.append(sys.maxint)
+			break
 
 def plotHeatMap(base,varys):
 	paramarray=[]

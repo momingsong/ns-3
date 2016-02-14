@@ -73,9 +73,6 @@ for file in simlationFile:
 						params[info[j][2:5]]=info[j][6:]
 					#else:
 					#	sys.exit(103)
-			if len(vary) < 2:
-				print "too few varys"
-				sys.exit(102)
 			print vary
 
 			#setting all variables 
