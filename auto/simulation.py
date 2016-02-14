@@ -66,9 +66,9 @@ for file in simlationFile:
 					if params.has_key(info[j][2:5]) and info[j][5]=='[':
 						#vary[info[j][2:5]]=info[j][5:]
 						vary.append([info[j][2:5],info[j][5:]])
-						if len(vary)>=3:
-							print "too many varys"
-							sys.exit(101)
+						#if len(vary)>=3:
+						#	print "too many varys"
+						#	sys.exit(101)
 					elif params.has_key(info[j][2:5]) and info[j][5]=='=':
 						params[info[j][2:5]]=info[j][6:]
 					#else:
