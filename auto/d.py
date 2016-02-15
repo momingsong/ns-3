@@ -24,8 +24,8 @@ def RecallAndLatency(typePrefix,varys,params):
                     paramarray[rv-2]=0
                     paramarray[rv-3]+=1
 
-            recallf = open("./%(typePrefix)s-recall%(paramlist)s-%(avgs)s.sum"%vars(), "w")
-            latencyf = open("./%(typePrefix)s-latency%(paramlist)s-%(avgs)s.sum"%vars(), "w")
+            recallf = open("./%(typePrefix)s-recall%(paramlist)s&%(avgs)s.sum"%vars(), "w")
+            latencyf = open("./%(typePrefix)s-latency%(paramlist)s&%(avgs)s.sum"%vars(), "w")
             recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
             latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
             recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
@@ -39,7 +39,7 @@ def RecallAndLatency(typePrefix,varys,params):
                 latencyf.write(str(a)+" ")
                 for b in eval(varys[1][1]):
                     params[varys[1][0]] = b
-                    file = open("./%s_%s%s_%s%s%s-%s_0.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
+                    file = open("./%s_%s%s_%s%s%s&%s_0.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
                     line = file.readlines()[-1].split()
                     recallf.write(str(float(line[1])/float(params['daa']))+" ")
                     latencyf.write(line[0]+" ")
@@ -48,7 +48,6 @@ def RecallAndLatency(typePrefix,varys,params):
                 latencyf.write("\n")
             recallf.close()
             latencyf.close()
-
             if len(paramarray)==0:
                 break
 
@@ -80,7 +79,7 @@ def RSRHeatmap(typePrefix, varys, params):
                 recvList.append([])
                 ratiolist.append(0)
             for logcontent in ['SI','SD']:
-                file = open("./%s%s-%s_%s.data"%(typePrefix,paramlist,avgs,logcontent))
+                file = open("./%s%s&%s_%s.data"%(typePrefix,paramlist,avgs,logcontent))
                 for line in file:
                     if(line[0:2] == logcontent):
                         info = line.split(" ")
@@ -92,7 +91,7 @@ def RSRHeatmap(typePrefix, varys, params):
                             sendList[int(info[1])].append(hopnonce)
                 file.close()
             for logcontent in ['RI','DRD']:
-                file = open("./%s%s-%s_%s.data"%(typePrefix,paramlist,avgs,logcontent))
+                file = open("./%s%s&%s_%s.data"%(typePrefix,paramlist,avgs,logcontent))
                 for line in file:
                     if(line[0:2] == logcontent or line[0:3] == logcontent):
                         info = line.split(" ")
@@ -120,8 +119,8 @@ def RSRHeatmap(typePrefix, varys, params):
                     ratiolist[i] = 0
                 else:
                     ratiolist[i] /= float(len(sendList[i]))
-            writefile = open("./%s-heatmap%s-%s.sum"%(typePrefix,paramlist,avgs), "w")
-            writefile.write("#%s-heatmap%s-%s.sum\n"%(typePrefix,paramlist,avgs))
+            writefile = open("./%s-heatmap%s&%s.sum"%(typePrefix,paramlist,avgs), "w")
+            writefile.write("#%s-heatmap%s&%s.sum\n"%(typePrefix,paramlist,avgs))
             writefile.write("#Data for receive send ratio on each ndoe of the %(typePrefix)s\n"%vars())
             writefile.write("#10x10 grid. Each = R/S ratio for the node.\n")
             for i in xrange(10):
@@ -132,11 +131,10 @@ def RSRHeatmap(typePrefix, varys, params):
 
 
 def average(params):
-    head=params['t']
     imageclass={}
     for files in os.listdir("./"):
         if files.split('.')[-1]=="sum":
-            info = files.split('-')
+            info = files.split('&')
             if(info[-1].split('.')[0].isdigit()):
                 if imageclass.has_key(info[-2]):
                     imageclass[info[-2]].append(info[-1])
@@ -144,12 +142,11 @@ def average(params):
                     imageclass[info[-2]]=[]
                     imageclass[info[-2]].append(info[-1])
     for k in imageclass:
-        writefile = open("./%s-%s.sum"%(head,k),'w')
+        writefile = open("./%s&avg.sum"%k,'w')
         karray = []
         for s in xrange(len(imageclass[k])):
             karray.append([])
-            print head,k
-            readfile = open("./%s-%s-%s"%(head,k,imageclass[k][s]))
+            readfile = open("./%s&%s"%(k,imageclass[k][s]))
 
             ln = 0
             for lines in readfile:
