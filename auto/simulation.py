@@ -48,7 +48,7 @@ for file in simlationFile:
 		params['rty']="0"
 		params['eck']="0"
 		params['ecm']="0"
-		params['sed']="1"
+		params['avg']="1"
 		vary=[]
 		number += 1
 		if line[0]!='#':
