@@ -170,21 +170,6 @@ std::ofstream output;
   output.open(std::string(prefix_ + "_SD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"SD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" Toip"<<tip_ss.str()<<" "<<size<<" "<< metadata.size()<<std::endl;
 
-if(app->GetNode()->GetId() == 44)
-{
-  output<<"Content: ";
-  for(std::set<int>::iterator sit=metadata.begin();sit!=metadata.end();sit++)
-  {
-    output<<*sit<<" ";
-  }
-  output<<std::endl;
-  output<<"Local Package: ";
-  for(std::set<int>::iterator lit=app->local_metadata().begin();lit!=app->local_metadata().end();lit++)
-  {
-   output<<*lit<<" ";
-  }
-  output<<std::endl;
-}
 
   message_size_ += size;
   data_size_ += size;
@@ -232,21 +217,6 @@ void PecTracer::WillReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4
 std::ofstream output;
   output.open(std::string(prefix_ + "_WRD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"WRD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" Toip"<<tip_ss.str()<<" "<<size<<" "<< metadata.size()<<std::endl;
-if(app->GetNode()->GetId() == 44)
-{
-output<<"Content: ";
-  for(std::set<int>::iterator sit=metadata.begin();sit!=metadata.end();sit++)
-	{
-output<<*sit<<" ";
-	}
-output<<std::endl;
-output<<"Local Package: ";
- for(std::set<int>::iterator lit=app->local_metadata().begin();lit!=app->local_metadata().end();lit++)
-	{
-output<<*lit<<" ";
-	}
-output<<std::endl;
-}
 }
 
 void PecTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4Address> to_ips, int nonce, int hop_nonce, uint32_t size, const std::set<int> & metadata) {
@@ -274,21 +244,7 @@ void PecTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std::set<Ipv4A
 std::ofstream output;
   output.open(std::string(prefix_ + "_DRD.data").c_str(),std::fstream::out | std::fstream::app);
 output<<"DRD: " << app->GetNode()->GetId()<< " " <<Simulator::Now().GetSeconds()<< " Package:" << nonce<<"  Hop:"<<hop_nonce<<" Fip:"<<fip_ss.str()<<" Toip"<<tip_ss.str()<<" "<<size<<" "<< metadata.size()<<std::endl;
-if(app->GetNode()->GetId() == 44)
-{
-  output<<"Content: ";
-  for(std::set<int>::iterator sit=metadata.begin();sit!=metadata.end();sit++)
-  {
-output<<*sit<<" ";
-  }
-output<<std::endl;
-output<<"Local Package: ";
- for(std::set<int>::iterator lit=app->local_metadata().begin();lit!=app->local_metadata().end();lit++)
-  {
-output<<*lit<<" ";
-  }
-output<<std::endl;
-}
+
 }
 
 void PecTracer::SendAck(Ptr<App> app, int nonce, int hop_nonce, Ipv4Address from_ip, uint32_t size) {
