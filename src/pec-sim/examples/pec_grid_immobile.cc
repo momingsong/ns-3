@@ -14,7 +14,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("PecSimple");
+NS_LOG_COMPONENT_DEFINE("PecGridImmobile");
 
 int main(int argc, char *argv[]) {
 
@@ -146,7 +146,6 @@ int main(int argc, char *argv[]) {
   std::stringstream stream;
   stream << "# tracePath=" << trace_path << std::endl
          << "# nodeNum=" << node_num << std::endl
-         << "# consumerIdx=" << consumer_index << std::endl
          << "# gridWidth=" << grid_width << std::endl
          << "# gridInterval=" << grid_interval << std::endl
          << "# consumerIdx=" << consumer_index << std::endl

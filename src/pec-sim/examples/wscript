@@ -3,3 +3,6 @@
 def build(bld):
     obj = bld.create_ns3_program('pec_grid_immobile', ['pec-sim'])
     obj.source = 'pec_grid_immobile.cc'
+
+    obj = bld.create_ns3_program('pec_multi_consumer', ['pec-sim'])
+    obj.source = 'pec_multi_consumer.cc'
