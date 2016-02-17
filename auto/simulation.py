@@ -24,6 +24,7 @@ for line in f:
 	item['r'] = False
 	item['b'] = False
 	item['m'] = False
+	item['q'] = False
 	#simulation steps
 	step = {}
 	step['x'] = False
@@ -44,6 +45,9 @@ for line in f:
 	params['eck']="0"
 	params['ecm']="0"
 	params['avg']="1"
+	params['mcn']="1"
+	params['mcm']="0"
+	params['mcx']="0"
 	vary=[]
 	number += 1
 	if line[0]!='#':
@@ -88,6 +92,7 @@ for line in f:
 			params['em'] = 'true'
 		if item['r']==True:
 			params['er'] = 'true'
+		params['q']=item['q']
 
 		if step['x']==True:
 			x.execute(item,vary,params,number)
