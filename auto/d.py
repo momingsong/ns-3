@@ -6,6 +6,7 @@ def RecallAndLatency(typePrefix,varys,params):
         if(len(varys)==1):
             print "recall and latency cannot be drawn"
             return
+
         paramarray=[]
         #print len(varys)
         for lv in xrange(2,len(varys)):
@@ -24,30 +25,38 @@ def RecallAndLatency(typePrefix,varys,params):
                     paramarray[rv-2]=0
                     paramarray[rv-3]+=1
 
-            recallf = open("./%(typePrefix)s-recall%(paramlist)s&%(avgs)s.sum"%vars(), "w")
-            latencyf = open("./%(typePrefix)s-latency%(paramlist)s&%(avgs)s.sum"%vars(), "w")
-            recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
-            latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
-            recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
-            latencyf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+            #read multiple consumer infomation
+            consumerlist = []
+            listfile=open("./%s_%s%s_%s%s%s&%s_list.data"%(typePrefix,varys[0][0],eval(varys[0][1])[0],varys[1][0],eval(varys[1][1])[0],paramlist,avgs))
+            for consumer in listfile:
+            	if consumer[0]!='#':
+            		info=consumer.split(' ')
+            		consumerlist.append(info[0])
 
-            
-            
-            for a in eval(varys[0][1]):
-                params[varys[0][0]] = a
-                recallf.write(str(a)+" ")
-                latencyf.write(str(a)+" ")
-                for b in eval(varys[1][1]):
-                    params[varys[1][0]] = b
-                    file = open("./%s_%s%s_%s%s%s&%s_0.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
-                    line = file.readlines()[-1].split()
-                    recallf.write(str(float(line[1])/float(params['daa']))+" ")
-                    latencyf.write(line[0]+" ")
-                    file.close()
-                recallf.write("\n")
-                latencyf.write("\n")
-            recallf.close()
-            latencyf.close()
+            for il in consumerlist:
+            	#write file prepare
+	            recallf = open("./%(typePrefix)s-recall%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
+	            latencyf = open("./%(typePrefix)s-latency%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
+	            recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
+	            latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
+	            recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+	            latencyf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+
+	            for a in eval(varys[0][1]):
+	                params[varys[0][0]] = a
+	                recallf.write(str(a)+" ")
+	                latencyf.write(str(a)+" ")
+	                for b in eval(varys[1][1]):
+	                    params[varys[1][0]] = b
+	                    file = open("./%s_%s%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,il))
+	                    line = file.readlines()[-1].split()
+	                    recallf.write(str(float(line[1])/float(params['daa']))+" ")
+	                    latencyf.write(line[0]+" ")
+	                    file.close()
+	                recallf.write("\n")
+	                latencyf.write("\n")
+	            recallf.close()
+	            latencyf.close()
             if len(paramarray)==0:
                 break
 
