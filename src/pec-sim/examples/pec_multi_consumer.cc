@@ -304,11 +304,15 @@ int main(int argc, char *argv[]) {
   time_t begin_time;
   time(&begin_time);
 
-  double t = 0.0;
+  double t = 1.0;
   for (int i = 0; i < consumer_num; ++i) {
     int consumer_index = rand() % node_num;
     Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
-    t += (rand() % 10000) / 10000.0 * (mc_max_interval - mc_min_interval) + mc_min_interval;
+    if (mc_max_interval - mc_min_interval > 0) {
+      t += (rand() % 10000) / 10000.0 * (mc_max_interval - mc_min_interval) + mc_min_interval;
+    } else {
+      t += mc_min_interval;
+    }
     Simulator::ScheduleWithContext(consumer_index, Seconds(t), &ns3::pec::App::DataDiscovery, consumer);
   }
   Simulator::Run();
