@@ -38,6 +38,7 @@ PecTracer::~PecTracer() {
 }
 
 void PecTracer::TraceApps(ApplicationContainer apps) {
+  apps_=apps;
   num_ = apps.GetN();
   for (size_t i = 0; i < apps.GetN(); ++i) {
     Ptr<App> app = DynamicCast<App>(apps.Get(i));
@@ -118,7 +119,7 @@ void PecTracer::StartDataDiscovery(Ptr<App> app) {
   int index = tracers_.size();
   char indexChar[10];
   sprintf(indexChar, "%d", index);
-  DataDiscoveryTracer *tracer = new DataDiscoveryTracer(prefix_ + "_" + indexChar + ".data", comment_, start_time);
+  DataDiscoveryTracer *tracer = new DataDiscoveryTracer(prefix_ + "_" + indexChar + ".data", comment_, start_time, prefix_, apps_);
   tracer->TraceApp(app);
   tracers_.push_back(tracer);
   list_ << index << " " << app->GetNode()->GetId() << " " << start_time << std::endl;

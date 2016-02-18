@@ -47,6 +47,8 @@ class PecTracer {
 
   std::vector<DataDiscoveryTracer *> tracers_;
 
+  ApplicationContainer apps_;
+
   // overhead
   int num_;
   int message_num_;

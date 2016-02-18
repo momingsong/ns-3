@@ -305,8 +305,25 @@ int main(int argc, char *argv[]) {
   time(&begin_time);
 
   double t = 1.0;
+  std::vector<int> consumer_list;
   for (int i = 0; i < consumer_num; ++i) {
+    
     int consumer_index = rand() % node_num;
+    while (consumer_index/10>6 || consumer_index/10<2 || consumer_index%10>6 || consumer_index%10<2)
+          consumer_index = rand() % node_num;
+    //For 100 node num
+    for(size_t jj = 0; jj<consumer_list.size(); jj++)
+    {
+      if (consumer_index == consumer_list[jj])
+      {
+        consumer_index = rand() % node_num;
+        while (consumer_index/10>6 || consumer_index/10<2 || consumer_index%10>6 || consumer_index%10<2)
+          consumer_index = rand() % node_num;
+        jj=0;
+      }
+    }
+    consumer_list.push_back(consumer_index);
+
     Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
     if (mc_max_interval - mc_min_interval > 0) {
       t += (rand() % 10000) / 10000.0 * (mc_max_interval - mc_min_interval) + mc_min_interval;
