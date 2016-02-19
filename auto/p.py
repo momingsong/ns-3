@@ -32,11 +32,14 @@ def plotPlatencyCurve(base,varys,title):
 			\nplot \"%s.sum\" "%(fileprefix,varys[0][0],title,fileprefix)
 
 			b=eval(varys[1][1])
-			recalls += "using 1:2 title \"80%-Latency\"  with linespoints, "
-			recalls += "\"\" using 1:3 title \"85%-Latency\" with linespoints, "
-			recalls += "\"\" using 1:4 title \"90%-Latency\" with linespoints, "
-			recalls += "\"\" using 1:5 title \"95%-Latency\" with linespoints, "
-			recalls += "\"\" using 1:6 title \"Latency\" with linespoints"
+			recalls += "using 1:2 title \"50%-Latency\"  with linespoints, "
+			recalls += "\"\" using 1:3 title \"60%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:4 title \"70%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:5 title \"80%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:6 title \"85%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:7 title \"90%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:8 title \"95%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:9 title \"100%-Latency\" with linespoints"
 
 			recallf=open("./%s.gp"%(title),'w')
 			recallf.write(recalls)

@@ -101,20 +101,31 @@ def  PLatency(typePrefix, varys, params):
                             continue
                         else:
                             info = line.split(' ')
-                            if float(info[1])/float(params['daa']) >= 0.8 and order < 1:
+                            if float(info[1])/float(params['daa']) >= 0.5 and order < 1:
                                 platencyf.write(info[0]+" ") 
-                                print float(info[1])/float(params['daa']), order
                                 order = 1
-                            if float(info[1])/float(params['daa']) >= 0.85 and order < 2:
+                            if float(info[1])/float(params['daa']) >= 0.6 and order < 2:
                                 platencyf.write(info[0]+" ")
                                 order = 2
-                            if float(info[1])/float(params['daa']) >= 0.9 and order < 3:
+                            if float(info[1])/float(params['daa']) >= 0.7 and order < 3:
                                 platencyf.write(info[0]+" ")
                                 order = 3
-                            if float(info[1])/float(params['daa']) >= 0.95 and order < 4:
+                            if float(info[1])/float(params['daa']) >= 0.8 and order < 4:
                                 platencyf.write(info[0]+" ")
                                 order = 4
-                    platencyf.write(line.split(' ')[0] + " ")
+                            if float(info[1])/float(params['daa']) >= 0.85 and order < 5:
+                                platencyf.write(info[0]+" ") 
+                                order = 5
+                            if float(info[1])/float(params['daa']) >= 0.90 and order < 6:
+                                platencyf.write(info[0]+" ")
+                                order = 6
+                            if float(info[1])/float(params['daa']) >= 0.95 and order < 7:
+                                platencyf.write(info[0]+" ")
+                                order = 7
+                            if float(info[1])/float(params['daa']) >= 0.999999 and order < 8:
+                                platencyf.write(info[0]+" ")
+                                order = 8
+                    #platencyf.write(line.split(' ')[0] + " ")
                     platencyf.write("\n")
                     file.close()
                 platencyf.close()
