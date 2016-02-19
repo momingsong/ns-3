@@ -21,6 +21,29 @@ def plotSumCurve(base,varys,title):
 
 			os.system("gnuplot %s.gp"%(title))
 
+
+def plotPlatencyCurve(base,varys,title):
+	for filename in os.listdir("./"):
+		ix =  filename.find('-')
+		if filename[ix+1:].split('_')[0]==title and filename[-3:]=="sum":
+
+			fileprefix = filename[:-4]
+			recalls = "set terminal png\nset output \"%s.png\"\nset xlabel \"%s\"\nset ylabel \"%s\"\
+			\nplot \"%s.sum\" "%(fileprefix,varys[0][0],title,fileprefix)
+
+			b=eval(varys[1][1])
+			recalls += "using 1:2 title \"80%-Latency\"  with linespoints, "
+			recalls += "\"\" using 1:3 title \"85%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:4 title \"90%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:5 title \"95%-Latency\" with linespoints, "
+			recalls += "\"\" using 1:6 title \"Latency\" with linespoints"
+
+			recallf=open("./%s.gp"%(title),'w')
+			recallf.write(recalls)
+			recallf.close()
+
+			os.system("gnuplot %s.gp"%(title))
+
 def plotHeatMap(base,varys,title):
 	for filename in os.listdir("./"):
 		ix =  filename.find('-')
@@ -45,6 +68,7 @@ def plot(base,varys,number):
     plotSumCurve(base,varys,"recall")
     plotSumCurve(base,varys,"latency")
     plotHeatMap(base,varys,"heatmap")
+    plotPlatencyCurve(base,varys,"platency")
     os.chdir(current)
 
 

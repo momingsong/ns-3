@@ -33,7 +33,7 @@ def execute(methods,varys,params,number):
 					
 			print exe
 			#os.chdir("/home/sxt/workspace/pec/ns-3/")
-			os.chdir("/home/ubuntu/pecns3/")
+			os.chdir("/home/theodore/pecns3/")
 			os.system(exe)
 		os.system("mv *.data %s"%aimdir)	
 

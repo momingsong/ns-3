@@ -29,36 +29,95 @@ def RecallAndLatency(typePrefix,varys,params):
             consumerlist = []
             listfile=open("./%s_%s%s_%s%s%s&%s_list.data"%(typePrefix,varys[0][0],eval(varys[0][1])[0],varys[1][0],eval(varys[1][1])[0],paramlist,avgs))
             for consumer in listfile:
-            	if consumer[0]!='#':
-            		info=consumer.split(' ')
-            		consumerlist.append(info[0])
+                if consumer[0]!='#':
+                    info=consumer.split(' ')
+                    consumerlist.append(info[0])
 
             for il in consumerlist:
-            	#write file prepare
-	            recallf = open("./%(typePrefix)s-recall%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
-	            latencyf = open("./%(typePrefix)s-latency%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
-	            recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
-	            latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
-	            recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
-	            latencyf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+                #write file prepare
+                recallf = open("./%(typePrefix)s-recall%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
+                latencyf = open("./%(typePrefix)s-latency%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
+                recallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
+                latencyf.write("#Data for latency of the %(typePrefix)s\n"%vars())
+                recallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+                latencyf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
 
-	            for a in eval(varys[0][1]):
-	                params[varys[0][0]] = a
-	                recallf.write(str(a)+" ")
-	                latencyf.write(str(a)+" ")
-	                for b in eval(varys[1][1]):
-	                    params[varys[1][0]] = b
-	                    file = open("./%s_%s%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,il))
-	                    line = file.readlines()[-1].split()
-	                    recallf.write(str(float(line[1])/float(params['daa']))+" ")
-	                    latencyf.write(line[0]+" ")
-	                    file.close()
-	                recallf.write("\n")
-	                latencyf.write("\n")
-	            recallf.close()
-	            latencyf.close()
+                for a in eval(varys[0][1]):
+                    params[varys[0][0]] = a
+                    recallf.write(str(a)+" ")
+                    latencyf.write(str(a)+" ")
+                    for b in eval(varys[1][1]):
+                        params[varys[1][0]] = b
+                        file = open("./%s_%s%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,il))
+                        line = file.readlines()[-1].split()
+                        recallf.write(str(float(line[1])/float(params['daa']))+" ")
+                        latencyf.write(line[0]+" ")
+                        file.close()
+                    recallf.write("\n")
+                    latencyf.write("\n")
+                recallf.close()
+                latencyf.close()
             if len(paramarray)==0:
                 break
+
+
+def  PLatency(typePrefix, varys, params):
+    for avgs in xrange(int(params['avg']),0,-1):
+        paramarray=[]
+        #print len(varys)
+        for lv in xrange(1,len(varys)):
+            paramarray.append(0)
+        #print paramarray
+        while len(paramarray)==0 or paramarray[0] < len(eval(varys[1][1])):
+            paramlist=""
+            for lv in xrange(1,len(varys)):
+                kv=eval(varys[lv][1])
+                paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-1]])))
+                params[varys[lv][0]]=kv[paramarray[lv-1]]
+            if len(paramarray) > 0:
+                paramarray[-1]+=1
+            for rv in xrange(len(varys)-1,1,-1):
+                if paramarray[rv-1]>=len(eval(varys[rv][1])):
+                    paramarray[rv-1]=0
+                    paramarray[rv-2]+=1
+
+            #read multiple consumer infomation
+            consumerlist = []
+            listfile=open("./%s_%s%s%s&%s_list.data"%(typePrefix,varys[0][0],eval(varys[0][1])[0],paramlist,avgs))
+            for consumer in listfile:
+                if consumer[0]!='#':
+                    info=consumer.split(' ')
+                    consumerlist.append(info[0])
+
+            for il in consumerlist:
+                platencyf = open("./%(typePrefix)s-platency%(paramlist)s_%(il)s&%(avgs)s.sum"%vars(), "w")
+                for a in eval(varys[0][1]):
+                    params[varys[0][0]] = a
+                    platencyf.write(str(a)+" ")
+                    file = open("./%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),paramlist,avgs,il))
+                    order = 0
+                    for line in file:
+                        if line[0]=='#':
+                            continue
+                        else:
+                            info = line.split(' ')
+                            if float(info[1])/float(params['daa']) >= 0.8 and order < 1:
+                                platencyf.write(info[0]+" ") 
+                                print float(info[1])/float(params['daa']), order
+                                order = 1
+                            if float(info[1])/float(params['daa']) >= 0.85 and order < 2:
+                                platencyf.write(info[0]+" ")
+                                order = 2
+                            if float(info[1])/float(params['daa']) >= 0.9 and order < 3:
+                                platencyf.write(info[0]+" ")
+                                order = 3
+                            if float(info[1])/float(params['daa']) >= 0.95 and order < 4:
+                                platencyf.write(info[0]+" ")
+                                order = 4
+                    platencyf.write(line.split(' ')[0] + " ")
+                    platencyf.write("\n")
+                    file.close()
+                platencyf.close()
 
 def RSRHeatmap(typePrefix, varys, params):
     for avgs in xrange(int(params['avg']),0,-1):
@@ -188,6 +247,7 @@ def process(varys,params,number):
     os.chdir(aimdir)
     RecallAndLatency(base,varys,params)
     RSRHeatmap(base,varys,params)
+    PLatency(base,varys,params)
     average(params)
     os.chdir(current)
     
