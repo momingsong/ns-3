@@ -4,7 +4,7 @@ import sys
 def plotSumCurve(base,varys,title):
 	for filename in os.listdir("./"):
 		ix =  filename.find('-')
-		if filename[ix+1:].split('_')[0]==title and filename[-3:]=="sum":
+		if filename[ix+1:].split('&')[0].split('_')[0]==title and filename[-3:]=="sum":
 
 			fileprefix = filename[:-4]
 			recalls = "set terminal png\nset output \"%s.png\"\nset xlabel \"%s\"\nset ylabel \"%s\"\
@@ -63,6 +63,45 @@ def plotHeatMap(base,varys,title):
 			hf.close()
 			os.system("gnuplot %(title)s.gp"%vars())
 
+def plotCDF(base,varys,title):
+	for filename in os.listdir("./"):
+		ix =  filename.find('-')
+		if filename[ix+1:].split('&')[0].split('_')[0]==title and filename[-3:]=="sum":
+
+			fileprefix = filename[:-4]
+			cdfs = "set terminal png\nset output \"%s.png\"\nset xlabel \"%s\"\nset ylabel \"%s\"\
+			\nplot \"%s.sum\" "%(fileprefix,title,"CDF",fileprefix)
+
+			b=eval(varys[0][1])
+			cdfs += "using 1:2 title \"%s=%s\" with linespoints, "%(varys[0][0],str(b[0]))
+			for a in xrange(1,len(b)):
+				cdfs += "\"\" using %d:%d title \"%s=%s\" with linespoints, "%(a*2+1,a*2+2,varys[0][0],str(b[a]))
+
+			cdff=open("./%s.gp"%(title),'w')
+			cdff.write(cdfs)
+			cdff.close()
+
+			os.system("gnuplot %s.gp"%(title))
+
+def plotOneCurv(base,varys,title):
+	for filename in os.listdir("./"):
+		ix =  filename.find('-')
+		if filename[ix+1:].split('&')[0].split('_')[0]==title and filename[-3:]=="sum":
+
+			fileprefix = filename[:-4]
+			onel = "set terminal png\nset output \"%s.png\"\nset xlabel \"%s\"\nset ylabel \"%s\"\
+			\nplot \"%s.sum\" "%(fileprefix,"time",title,fileprefix)
+
+			b=eval(varys[0][1])
+			onel += "using 1:2 title \"%s=%s\" with linespoints, "%(varys[0][0],str(b[0]))
+			for a in xrange(1,len(b)):
+				onel += "\"\" using %d:%d title \"%s=%s\" with linespoints, "%(a*2+1,a*2+2,varys[0][0],str(b[a]))
+
+			onef=open("./%s.gp"%(title),'w')
+			onef.write(onel)
+			onef.close()
+
+			os.system("gnuplot %s.gp"%(title))
 
 def plot(base,varys,number):
     current = os.path.dirname(__file__)
@@ -70,8 +109,12 @@ def plot(base,varys,number):
     os.chdir(aimdir)
     plotSumCurve(base,varys,"recall")
     plotSumCurve(base,varys,"latency")
+    plotSumCurve(base,varys,"message")
     plotHeatMap(base,varys,"heatmap")
     plotPlatencyCurve(base,varys,"platency")
+    plotCDF(base,varys,"rsratio")
+    plotOneCurv(base,varys,"timerecall")
+    plotOneCurv(base,varys,"timerecvmsg")
     os.chdir(current)
 
 
