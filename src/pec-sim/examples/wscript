@@ -6,3 +6,6 @@ def build(bld):
 
     obj = bld.create_ns3_program('pec_multi_consumer', ['pec-sim'])
     obj.source = 'pec_multi_consumer.cc'
+
+    obj = bld.create_ns3_program('pec_mobile', ['pec-sim'])
+    obj.source = 'pec_mobile.cc'
