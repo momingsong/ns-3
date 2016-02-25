@@ -303,11 +303,14 @@ int main(int argc, char *argv[]) {
 
   time_t begin_time;
   time(&begin_time);
+int cons[5] = {22,26,62,66,44};
 
   double t = 1.0;
   std::vector<int> consumer_list;
+
   for (int i = 0; i < consumer_num; ++i) {
-    
+    int consumer_index = cons[i];
+/*  
     int consumer_index = rand() % node_num;
     while (consumer_index/10>6 || consumer_index/10<2 || consumer_index%10>6 || consumer_index%10<2)
           consumer_index = rand() % node_num;
@@ -321,7 +324,7 @@ int main(int argc, char *argv[]) {
           consumer_index = rand() % node_num;
         jj=0;
       }
-    }
+    }*/
     consumer_list.push_back(consumer_index);
 
     Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
