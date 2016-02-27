@@ -15,9 +15,10 @@ def RecallAndLatency(typePrefix,varys,params):
         while len(paramarray)==0 or paramarray[0] < len(eval(varys[2][1])):
             paramlist=""
             for lv in xrange(2,len(varys)):
-                kv=eval(varys[lv][1])
-                paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
-                params[varys[lv][0]]=kv[paramarray[lv-2]]
+                if(varys!='trf'):
+                    kv=eval(varys[lv][1])
+                    paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
+                    params[varys[lv][0]]=kv[paramarray[lv-2]]
             if len(paramarray) > 0:
                 paramarray[-1]+=1
             for rv in xrange(len(varys)-1,2,-1):
@@ -471,8 +472,8 @@ def RoundNumber(typePrefix,varys,params):
                         file = open("./%s_%s%s_%s%s%s&%s_SI.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
                         rn = 0
                         for line in file:
-                            if line[0:2]=="SI"
-                            info = line.split(' ')
+                            if line[0:2]=="SI":
+                                info = line.split(' ')
                             if info[1] == il[1]:
                                 rn += 1
                         rnf.write(str(rn)+" ")
@@ -542,11 +543,11 @@ def process(varys,params,number):
     aimdir = current + "/%d-%s"%(number,base)
     os.chdir(aimdir)
     RecallAndLatency(base,varys,params)
-    RSRHeatmap(base,varys,params)
-    PLatency(base,varys,params)
-    MessageSize(base,varys,params)
-    RSRatioCDF(base,varys,params)
-    TimeRecallAndReceive(base,varys,params)
+    #RSRHeatmap(base,varys,params)
+    #PLatency(base,varys,params)
+    #MessageSize(base,varys,params)
+    #RSRatioCDF(base,varys,params)
+    #TimeRecallAndReceive(base,varys,params)
     average(params)
     os.chdir(current)
     

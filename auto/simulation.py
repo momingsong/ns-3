@@ -48,6 +48,8 @@ for line in f:
 	params['mcn']="1"
 	params['mcm']="0"
 	params['mcx']="0"
+	params['trf']=''
+	params['tno']="1"
 	vary=[]
 	number += 1
 	if line[0]!='#':

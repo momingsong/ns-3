@@ -1,0 +1,1 @@
+qmar xdp --trf['Class1','Class2'] --tno=25 --mss=0.2 --mws[1,2] --thd[0,0.1] --thr=0 --rto=0.5 --rty=5 --daa=5000 --rdd=1 --avg=1 --mcn=5 --mcm=300 --mcx=300
