@@ -515,18 +515,23 @@ def average(params):
                     karray[s].append([])
                     for numbers in lines.split():
                         #print k
-                        karray[s][ln].append(float(numbers))
+                        if numbers.isdigit():
+                            karray[s][ln].append(float(numbers))
+                        else:
+                            karray[s][ln].append(numbers)
                     ln+=1
         for a in xrange(1,len(karray)):
             for b in xrange(len(karray[a])):
                 for c in xrange(len(karray[a][b])):
-		    if c>=len(karray[0][b]) or b>=len(karray[0]):
-			continue
-                    karray[0][b][c] += karray[a][b][c]
+                    if c>=len(karray[0][b]) or b>=len(karray[0]):
+                        continue
+                    if type(karray[0][b][c]) is float:
+                        karray[0][b][c] += karray[a][b][c]
 
         for b in xrange(len(karray[0])):
             for c in xrange(len(karray[0][b])):
-                karray[0][b][c] /= len(karray)
+                if type(karray[0][b][c]) is float:
+                    karray[0][b][c] /= len(karray)
                 writefile.write(str(karray[0][b][c]) + ' ')
             writefile.write('\n')
         writefile.close()
