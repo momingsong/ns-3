@@ -1,0 +1,49 @@
+<Situation timeslot="0.1" duration="600">
+   <groups>
+    <group pLeaving="5" pJoin="5" pDrift="100" pWholeMove="200" maxSpeed="1.5" joinSpeed="10000">
+      <area ltx="0" lty="0" rbx="80" rby="120"></area>
+      <nodes number="20"></nodes>
+	  
+      <!--
+      <entry>
+        <point x="0" y="60"></point>
+        <point x="20" y="0"></point>
+        <point x="120" y="80"></point>
+      </entry>
+-->
+	  
+	  
+    </group>
+	<!--
+	<group pLeaving="2" pJoin="5" pDrift="100" pWholeMove="85" maxSpeed="1.5">
+      <area ltx="50" lty="200" rbx="80" rby="230"></area>
+      <nodes number="20"></nodes>
+    <whole>
+      <point x="50" y="200"></point>
+      <point x="200" y="150"></point>
+      <point x="100" y="70"></point>
+      <point x="0" y="0"></point>
+    </whole>
+
+  </group>
+   -->
+     <!--
+	<group pLeaving="1" pJoin="3000" pDrift="2" pWholeMove="0" maxSpeed="1.5">
+      <area ltx="30" lty="15" rbx="40" rby="25"></area>
+      <nodes number="5"></nodes>
+    </group>
+    
+	<group pLeaving="1" pJoin="6000" pDrift="2" pWholeMove="0" maxSpeed="1.5">
+      <area ltx="50" lty="5" rbx="60" rby="15"></area>
+      <nodes number="7"></nodes>
+    </group>-->
+	
+	
+  </groups>
+
+  <individuals>
+    <individual pDrift="0" driftRange="6" maxSpeed="10000">
+      <nodes number="5"></nodes>
+    </individual>
+  </individuals>
+</Situation>

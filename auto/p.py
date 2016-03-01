@@ -110,6 +110,8 @@ def plot(base,varys,number):
     plotSumCurve(base,varys,"recall")
     plotSumCurve(base,varys,"latency")
     plotSumCurve(base,varys,"message")
+    plotSumCurve(base,varys,"alltimerecall")
+    plotSumCurve(base,varys,"connectrecall")
     plotHeatMap(base,varys,"heatmap")
     plotPlatencyCurve(base,varys,"platency")
     plotCDF(base,varys,"rsratio")

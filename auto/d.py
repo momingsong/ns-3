@@ -15,10 +15,9 @@ def RecallAndLatency(typePrefix,varys,params):
         while len(paramarray)==0 or paramarray[0] < len(eval(varys[2][1])):
             paramlist=""
             for lv in xrange(2,len(varys)):
-                if(varys!='trf'):
-                    kv=eval(varys[lv][1])
-                    paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
-                    params[varys[lv][0]]=kv[paramarray[lv-2]]
+                kv=eval(varys[lv][1])
+                paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
+                params[varys[lv][0]]=kv[paramarray[lv-2]]
             if len(paramarray) > 0:
                 paramarray[-1]+=1
             for rv in xrange(len(varys)-1,2,-1):
@@ -27,6 +26,7 @@ def RecallAndLatency(typePrefix,varys,params):
                     paramarray[rv-3]+=1
 
             #read multiple consumer infomation
+            #
             consumerlist = []
             listfile=open("./%s_%s%s_%s%s%s&%s_list.data"%(typePrefix,varys[0][0],eval(varys[0][1])[0],varys[1][0],eval(varys[1][1])[0],paramlist,avgs))
             for consumer in listfile:
@@ -58,6 +58,115 @@ def RecallAndLatency(typePrefix,varys,params):
                     latencyf.write("\n")
                 recallf.close()
                 latencyf.close()
+            if len(paramarray)==0:
+                break
+
+def MobileRecall(typePrefix, varys, params):
+    for avgs in xrange(int(params['avg']),0,-1):
+        if(len(varys)==1):
+            print "recall and latency cannot be drawn"
+            return
+
+        paramarray=[]
+        #print len(varys)
+        for lv in xrange(2,len(varys)):
+            paramarray.append(0)
+        #print paramarray
+        while len(paramarray)==0 or paramarray[0] < len(eval(varys[2][1])):
+            paramlist=""
+            for lv in xrange(2,len(varys)):
+                kv=eval(varys[lv][1])
+                paramlist+= ("_%s%s"%(varys[lv][0],str(kv[paramarray[lv-2]])))
+                params[varys[lv][0]]=kv[paramarray[lv-2]]
+
+            if len(paramarray) > 0:
+                paramarray[-1]+=1
+            for rv in xrange(len(varys)-1,2,-1):
+                if paramarray[rv-2]>=len(eval(varys[rv][1])):
+                    paramarray[rv-2]=0
+                    paramarray[rv-3]+=1
+            #read multiple consumer infomation
+            
+
+            for consumeridx in xrange(int(params['mcn'])):
+
+                allrecallf = open("./%(typePrefix)s-alltimerecall%(paramlist)s_%(consumeridx)s&%(avgs)s.sum"%vars(), "w")
+                connectrecallf = open("./%(typePrefix)s-connectrecall%(paramlist)s_%(consumeridx)s&%(avgs)s.sum"%vars(), "w")
+                allrecallf.write("#Data for recall of the %(typePrefix)s\n"%vars())
+                connectrecallf.write("#Data for latency of the %(typePrefix)s\n"%vars())
+                allrecallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+                connectrecallf.write("#%s %s\n"%(varys[1][0],varys[1][1]))
+
+                for a in eval(varys[0][1]):
+                    params[varys[0][0]] = a
+                    allrecallf.write(str(a)+" ")
+                    connectrecallf.write(str(a)+" ")
+                    for b in eval(varys[1][1]):
+                        params[varys[1][0]] = b
+
+                        consumerlist = []
+                        listfile=open("./%s_%s%s_%s%s%s&%s_list.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
+                        for consumer in listfile:
+                            if consumer[0]!='#':
+                                info=consumer.split(' ')
+                                consumerlist.append([info[0],info[1],info[2]])
+                        listfile.close()
+
+
+                         #get the whole network activity time. using last entry of drd. only works for the simutaiously metadata discovery situation
+                        drdfile=open("./%s_%s%s_%s%s%s&%s_DRD.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs))
+                        line = drdfile.readlines()[-1].split()
+                        endtime = line[2]
+                        drdfile.close()
+
+                        mobilityinput="../mobility/mobility ../%s.mob 0.1 %.1f %.1f %s %.1f 163 > mobility.data"%(params['trf'],float(endtime)+1,float(consumerlist[consumeridx][2]),consumerlist[consumeridx][1],float(endtime))
+                        os.system(mobilityinput)
+                        timerange = "0,%.1f"%(float(endtime) - float(consumerlist[consumeridx][2]))
+                        
+                        mobilityfile = open("mobility.data")
+                        alltimeconnectnode={}
+                        connectnode={}
+                        for line in mobilityfile:
+                            q = line.split(' ')
+                            timestamps =  q[1].strip().split(",")
+                            if abs(float(timestamps[0])) < 1e-6 and abs(float(timestamps[1])-(float(endtime)-float(consumerlist[consumeridx][2]))) < 0.05:
+                                alltimeconnectnode[q[0]] = True
+                                connectnode[q[0]] = True
+                        discoverfile=open("./%s_%s%s_%s%s%s&%s_%s_SFI.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,consumerlist[consumeridx][1]))
+                        firstRound = True
+                        alltimeconnectentry={}
+                        connectedentry={}
+                        for line in discoverfile:
+                            if line[0]!="S" and firstRound:
+                                firstRound = False
+                            elif line[0]!="S" and firstRound==False:
+                                break
+                            else:
+                                entry = line.split(' ')
+                                if alltimeconnectnode.has_key(entry[0][2:]):
+                                    for e in entry:
+                                        if e[0]!='S':
+                                            alltimeconnectentry[e.strip()] = 1
+                                if connectnode.has_key(entry[0][2:]):
+                                    for e in entry:
+                                        if e[0]!='S':
+                                            connectedentry[e.strip()] = 1
+                        discoverfile.close()
+
+                        alltimeconnectamout = len(alltimeconnectentry)
+                        connectedamount = len(connectedentry)
+
+                
+                
+                        file = open("./%s_%s%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,consumeridx))
+                        line = file.readlines()[-1].split()
+                        allrecallf.write(str(float(line[1])/float(alltimeconnectamout))+" ")
+                        connectrecallf.write(str(float(line[1])/float(connectedamount))+" ")
+                        file.close()
+                    allrecallf.write("\n")
+                    connectrecallf.write("\n")
+                allrecallf.close()
+                connectrecallf.close()
             if len(paramarray)==0:
                 break
 
@@ -114,7 +223,6 @@ def MessageSize(typePrefix, varys, params):
             wf.close()
             if len(paramarray)==0:
                 break
-
 
 def  PLatency(typePrefix, varys, params):
     for avgs in xrange(int(params['avg']),0,-1):
@@ -548,11 +656,12 @@ def process(varys,params,number):
     aimdir = current + "/%d-%s"%(number,base)
     os.chdir(aimdir)
     RecallAndLatency(base,varys,params)
+    MobileRecall(base,varys,params)
     #RSRHeatmap(base,varys,params)
-    #PLatency(base,varys,params)
-    #MessageSize(base,varys,params)
-    #RSRatioCDF(base,varys,params)
-    #TimeRecallAndReceive(base,varys,params)
+    PLatency(base,varys,params)
+    MessageSize(base,varys,params)
+    RSRatioCDF(base,varys,params)
+    TimeRecallAndReceive(base,varys,params)
     average(params)
     os.chdir(current)
     

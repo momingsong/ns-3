@@ -1,3 +1,4 @@
+#include <sstream>
 #include "data_discovery_tracer.h"
 
 #include "ns3/simulator.h"
@@ -48,7 +49,9 @@ void DataDiscoveryTracer::DidReceiveData(Ptr<App> app, Ipv4Address from_ip, std:
 void DataDiscoveryTracer::SendFirstInterest(Ptr<App> app, Ipv4Address from_ip, int nonce, int hop_nonce, uint32_t size, const bloom_filter & filter)
 {
   std::ofstream output;
-  output.open(std::string(prefix_ + "_SFI.data").c_str(),std::fstream::out | std::fstream::app);
+  std::stringstream consumer;
+  consumer << prefix_ << "_" << app->GetNode()->GetId() << "_SFI.data";
+  output.open(consumer.str().c_str(),std::fstream::out | std::fstream::app);
   output<<Simulator::Now().GetSeconds()<<std::endl;
   for (size_t i = 0; i < apps_.GetN(); ++i) 
   {
