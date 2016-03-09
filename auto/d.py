@@ -131,7 +131,7 @@ def MobileRecall(typePrefix, varys, params):
                             timestamps =  q[1].strip().split(",")
                             if abs(float(timestamps[0])) < 1e-6 and abs(float(timestamps[1])-(float(endtime)-float(consumerlist[consumeridx][2]))) < 0.05:
                                 alltimeconnectnode[q[0]] = True
-                                connectnode[q[0]] = True
+                            connectnode[q[0]] = True
                         discoverfile=open("./%s_%s%s_%s%s%s&%s_%s_SFI.data"%(typePrefix,varys[0][0],str(a),varys[1][0],str(b),paramlist,avgs,consumerlist[consumeridx][1]))
                         firstRound = True
                         alltimeconnectentry={}
@@ -224,7 +224,7 @@ def MessageSize(typePrefix, varys, params):
             if len(paramarray)==0:
                 break
 
-def  PLatency(typePrefix, varys, params):
+def PLatency(typePrefix, varys, params):
     for avgs in xrange(int(params['avg']),0,-1):
         paramarray=[]
         #print len(varys)
@@ -257,6 +257,11 @@ def  PLatency(typePrefix, varys, params):
                 for a in eval(varys[0][1]):
                     params[varys[0][0]] = a
                     platencyf.write(str(a)+" ")
+
+                    file = open("./%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),paramlist,avgs,il))
+                    tamount = float(file.readlines()[-1].split(' ')[1])
+                    file.close()
+
                     file = open("./%s_%s%s%s&%s_%s.data"%(typePrefix,varys[0][0],str(a),paramlist,avgs,il))
                     order = 0
                     for line in file:
@@ -264,28 +269,28 @@ def  PLatency(typePrefix, varys, params):
                             continue
                         else:
                             info = line.split(' ')
-                            if float(info[1])/float(params['daa']) >= 0.5 and order < 1:
+                            if float(info[1])/tamount >= 0.5 and order < 1:
                                 platencyf.write(info[0]+" ") 
                                 order = 1
-                            if float(info[1])/float(params['daa']) >= 0.6 and order < 2:
+                            if float(info[1])/tamount >= 0.6 and order < 2:
                                 platencyf.write(info[0]+" ")
                                 order = 2
-                            if float(info[1])/float(params['daa']) >= 0.7 and order < 3:
+                            if float(info[1])/tamount >= 0.7 and order < 3:
                                 platencyf.write(info[0]+" ")
                                 order = 3
-                            if float(info[1])/float(params['daa']) >= 0.8 and order < 4:
+                            if float(info[1])/tamount >= 0.8 and order < 4:
                                 platencyf.write(info[0]+" ")
                                 order = 4
-                            if float(info[1])/float(params['daa']) >= 0.85 and order < 5:
+                            if float(info[1])/tamount >= 0.85 and order < 5:
                                 platencyf.write(info[0]+" ") 
                                 order = 5
-                            if float(info[1])/float(params['daa']) >= 0.90 and order < 6:
+                            if float(info[1])/tamount >= 0.90 and order < 6:
                                 platencyf.write(info[0]+" ")
                                 order = 6
-                            if float(info[1])/float(params['daa']) >= 0.95 and order < 7:
+                            if float(info[1])/tamount >= 0.95 and order < 7:
                                 platencyf.write(info[0]+" ")
                                 order = 7
-                            if float(info[1])/float(params['daa']) >= 0.999999 and order < 8:
+                            if float(info[1])/tamount >= 0.999999 and order < 8:
                                 platencyf.write(info[0]+" ")
                                 order = 8
                     #platencyf.write(line.split(' ')[0] + " ")
