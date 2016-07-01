@@ -14,18 +14,7 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("PecMultiConsumer");
-
-void PrintMetadataNum(ApplicationContainer &apps, std::string prefix) {
-  std::ofstream output;
-  output.open(std::string(prefix + "_MN.data").c_str(),std::fstream::out | std::fstream::app);
-  for (unsigned int i = 0; i < apps.GetN(); ++i) {
-    Ptr<ns3::pec::App> node = DynamicCast<ns3::pec::App>(apps.Get(i));
-    output << node->local_metadata().size() << " ";
-  }
-  output << std::endl;
-  output.close();
-}
+NS_LOG_COMPONENT_DEFINE("Pec11N");
 
 int main(int argc, char *argv[]) {
 
@@ -39,15 +28,13 @@ int main(int argc, char *argv[]) {
 
   std::string trace_path = "trace";
 
-  int node_num = 30;
-  int grid_width = 6;
-  double grid_interval = 100.0;
+  int node_num = 100;
+  int grid_width = 10;
+  double grid_interval = 50.0;
   
-  int consumer_num = 3;
-  int mc_min_interval = 100;
-  int mc_max_interval = 150;
+  int consumer_index = 44;
 
-  int metadata_entry_size = 120; // 30;
+  int metadata_entry_size = 30;
   int data_amount = 10000;
   int redundancy = 1;
 
@@ -71,7 +58,7 @@ int main(int argc, char *argv[]) {
   double rt_timeout = 0.5;
   int rt_retry = 3;
 
-  bool enable_erasure_code = true;
+  bool enable_erasure_code = false;
   int ec_k = 10;
   int ec_m = 2;
 
@@ -86,13 +73,7 @@ int main(int argc, char *argv[]) {
   cmd.AddValue("gridWidth", "Number of nodes in a row", grid_width);
   cmd.AddValue("gridInterval", "Distance between adjacent nodes in the grid",
                 grid_interval);
-  cmd.AddValue("consumerNum", "Number of consumers", consumer_num);
-  cmd.AddValue("multiConsumerMinInterval",
-               "Multi Consumer: mimimum interval in seconds between two consumer request.",
-               mc_min_interval);
-  cmd.AddValue("multiConsumerMaxInterval",
-               "Multi Consumer: maximum interval in seconds between two consumer request.",
-               mc_max_interval);
+  cmd.AddValue("consumerIdx", "Index of the consumer node", consumer_index);
   cmd.AddValue("metadataEntrySize", "Size of each metadata entry in bytes", metadata_entry_size);
   cmd.AddValue("dataAmount",
                "How many different pieces of data exist in the network",
@@ -167,9 +148,7 @@ int main(int argc, char *argv[]) {
          << "# nodeNum=" << node_num << std::endl
          << "# gridWidth=" << grid_width << std::endl
          << "# gridInterval=" << grid_interval << std::endl
-         << "# consumerNum=" << consumer_num << std::endl
-         << "# multiConsumerMinInterval=" << mc_min_interval << std::endl
-         << "# multiConsumerMaxInterval=" << mc_max_interval << std::endl
+         << "# consumerIdx=" << consumer_index << std::endl
          << "# metadataEntrySize=" << metadata_entry_size << std::endl
          << "# dataAmount=" << data_amount << std::endl
          << "# redundancy=" << redundancy << std::endl
@@ -218,11 +197,11 @@ int main(int argc, char *argv[]) {
                       StringValue ("2200"));
   // Fix non-unicast data rate to be the same as that of unicast
   Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
-                      StringValue ("HtMcs0"));
+                       StringValue ("HtMcs0"));
 
   // The below set of helpers will help us to put together the wifi NICs we want
   WifiHelper wifi;
-  wifi.SetStandard(WIFI_PHY_STANDARD_80211n_2_4GHZ);
+  wifi.SetStandard(WIFI_PHY_STANDARD_80211n_5GHZ);
 
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default();
   // This is one parameter that matters when using FixedRssLossModel
@@ -250,7 +229,7 @@ int main(int argc, char *argv[]) {
   NetDeviceContainer devices = wifi.Install(wifiPhy, wifiMac, nodes);
 
   // Set channel width
-  Config::Set("NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/ChannelWidth", UintegerValue(20));
+  Config::Set("NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/ChannelWidth", UintegerValue(40));
 
   //
   // IP
@@ -271,8 +250,8 @@ int main(int argc, char *argv[]) {
   mobility.SetPositionAllocator("ns3::GridPositionAllocator",
                                 "MinX", DoubleValue (0.0),
                                 "MinY", DoubleValue (0.0),
-                                "DeltaX", DoubleValue (24.0),//(grid_interval),
-                                "DeltaY", DoubleValue (30.0),//(grid_interval),
+                                "DeltaX", DoubleValue (grid_interval),
+                                "DeltaY", DoubleValue (grid_interval),
                                 "GridWidth", UintegerValue (grid_width),
                                 "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -319,40 +298,9 @@ int main(int argc, char *argv[]) {
 
   time_t begin_time;
   time(&begin_time);
-  int cons[3] = {7,22,14};
 
-  double t = 1.0;
-  std::vector<int> consumer_list;
-
-  for (int i = 0; i < consumer_num; ++i) {
-    int consumer_index = cons[i];
-/*  
-    int consumer_index = rand() % node_num;
-    while (consumer_index/10>6 || consumer_index/10<2 || consumer_index%10>6 || consumer_index%10<2)
-          consumer_index = rand() % node_num;
-    //For 100 node num
-    for(size_t jj = 0; jj<consumer_list.size(); jj++)
-    {
-      if (consumer_index == consumer_list[jj])
-      {
-        consumer_index = rand() % node_num;
-        while (consumer_index/10>6 || consumer_index/10<2 || consumer_index%10>6 || consumer_index%10<2)
-          consumer_index = rand() % node_num;
-        jj=0;
-      }
-    }*/
-    consumer_list.push_back(consumer_index);
-
-    Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
-    if (mc_max_interval - mc_min_interval > 0) {
-      t += (rand() % 10000) / 10000.0 * (mc_max_interval - mc_min_interval) + mc_min_interval;
-    } else {
-      t += mc_min_interval;
-    }
-    Simulator::Schedule(Seconds(t-0.5), &PrintMetadataNum, apps, trace_path);
-    Simulator::ScheduleWithContext(consumer_index, Seconds(t), &ns3::pec::App::DataDiscovery, consumer);
-  }
-  Simulator::Schedule(Seconds(t + 100.0), &PrintMetadataNum, apps, trace_path);
+  Ptr<ns3::pec::App> consumer = DynamicCast<ns3::pec::App>(apps.Get(consumer_index));
+  Simulator::ScheduleWithContext(consumer_index, Seconds(1.0), &ns3::pec::App::DataDiscovery, consumer);
   Simulator::Run();
   Simulator::Destroy();
   tracer.Output();

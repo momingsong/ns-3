@@ -661,7 +661,7 @@ def process(varys,params,number):
     aimdir = current + "/%d-%s"%(number,base)
     os.chdir(aimdir)
     RecallAndLatency(base,varys,params)
-    MobileRecall(base,varys,params)
+    #MobileRecall(base,varys,params)
     #RSRHeatmap(base,varys,params)
     PLatency(base,varys,params)
     MessageSize(base,varys,params)

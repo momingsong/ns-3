@@ -30,12 +30,15 @@ def execute(methods,varys,params,number):
 				exe = './waf --run "pec_multi_consumer --tracePath='+params['t']+paramlist+'&'+str(avgs)+' --dataAmount=%(daa)s --redundancy=%(rdd)s --enableRedundancyDetection=%(er)s --enableCollisionAvoidance=%(ec)s --maxMetadataPerMessage=%(mpm)s --maxBackoff=%(mbo)s --enableMultiRound=%(em)s --multiRoundRoundFinishThreshold=%(thr)s --multiRoundDiscoveryFinishThreshold=%(thd)s --multiRoundSlotSize=%(mss)s --multiRoundWindowSize=%(mws)s --enableRetransmit=%(ea)s --retransmitTimeout=%(rto)s --retransmitRetry=%(rty)s --enableErasureCoding=%(ee)s --erasureCodingK=%(eck)s --erasureCodingM=%(ecm)s --seed=%(sed)s --consumerNum=%(mcn)s --multiConsumerMinInterval=%(mcm)s --multiConsumerMaxInterval=%(mcx)s"'%params
 			elif params['trf']!='':
 				exe = './waf --run "pec_mobile --tracePath='+params['t']+paramlist+'&'+str(avgs)+' --mobilityTrace='+current+'/%(trf)s.mob --nodeNum=%(tno)s --dataAmount=%(daa)s --redundancy=%(rdd)s --enableRedundancyDetection=%(er)s --enableCollisionAvoidance=%(ec)s --maxMetadataPerMessage=%(mpm)s --maxBackoff=%(mbo)s --enableMultiRound=%(em)s --multiRoundRoundFinishThreshold=%(thr)s --multiRoundDiscoveryFinishThreshold=%(thd)s --multiRoundSlotSize=%(mss)s --multiRoundWindowSize=%(mws)s --enableRetransmit=%(ea)s --retransmitTimeout=%(rto)s --retransmitRetry=%(rty)s --enableErasureCoding=%(ee)s --erasureCodingK=%(eck)s --erasureCodingM=%(ecm)s --seed=%(sed)s --consumerNum=%(mcn)s --multiConsumerMinInterval=%(mcm)s --multiConsumerMaxInterval=%(mcx)s"'%params
+			elif params['n']:
+				exe = './waf --run "pec_11n --tracePath='+params['t']+paramlist+'&'+str(avgs)+' --dataAmount=%(daa)s --redundancy=%(rdd)s --enableRedundancyDetection=%(er)s --enableCollisionAvoidance=%(ec)s --maxMetadataPerMessage=%(mpm)s --maxBackoff=%(mbo)s --enableMultiRound=%(em)s --multiRoundRoundFinishThreshold=%(thr)s --multiRoundDiscoveryFinishThreshold=%(thd)s --multiRoundSlotSize=%(mss)s --multiRoundWindowSize=%(mws)s --enableRetransmit=%(ea)s --retransmitTimeout=%(rto)s --retransmitRetry=%(rty)s --enableErasureCoding=%(ee)s --erasureCodingK=%(eck)s --erasureCodingM=%(ecm)s --seed=%(sed)s"'%params
 			else:
 				exe = './waf --run "pec_grid_immobile --tracePath='+params['t']+paramlist+'&'+str(avgs)+' --dataAmount=%(daa)s --redundancy=%(rdd)s --enableRedundancyDetection=%(er)s --enableCollisionAvoidance=%(ec)s --maxMetadataPerMessage=%(mpm)s --maxBackoff=%(mbo)s --enableMultiRound=%(em)s --multiRoundRoundFinishThreshold=%(thr)s --multiRoundDiscoveryFinishThreshold=%(thd)s --multiRoundSlotSize=%(mss)s --multiRoundWindowSize=%(mws)s --enableRetransmit=%(ea)s --retransmitTimeout=%(rto)s --retransmitRetry=%(rty)s --enableErasureCoding=%(ee)s --erasureCodingK=%(eck)s --erasureCodingM=%(ecm)s --seed=%(sed)s"'%params
 					
 			print exe
+			os.chdir("/home/xintongsong/Workspace/pecns3/")
 			#os.chdir("/home/sxt/workspace/pec/ns-3/")
-			os.chdir("/home/ubuntu/pecns3/")
+			#os.chdir("/home/ubuntu/pecns3/")
 			os.system(exe)
 		os.system("mv *.data %s"%aimdir)	
 
@@ -46,7 +49,7 @@ def execute(methods,varys,params,number):
 
 
 def baseECC(base):
-	if base=="a" or base=="b" or base=="e" or base=="m" or base=="r" or base=="o":
+	if base=="a" or base=="b" or base=="e" or base=="m" or base=="r" or base=="o" or base=="n":
 		return base
 	else:
 		print "Wrong input base"

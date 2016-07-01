@@ -25,6 +25,7 @@ for line in f:
 	item['b'] = False
 	item['m'] = False
 	item['q'] = False
+	item['n'] = False
 	#simulation steps
 	step = {}
 	step['x'] = False
@@ -95,6 +96,7 @@ for line in f:
 		if item['r']==True:
 			params['er'] = 'true'
 		params['q']=item['q']
+		params['n']=item['n']
 
 		if step['x']==True:
 			x.execute(item,vary,params,number)
